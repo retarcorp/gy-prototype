@@ -1,13 +1,9 @@
 import { Box, Button, Card, CardContent, Grid, Pagination, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import { Fragment, useEffect, useState } from "react"
+import { Fragment, useState } from "react"
 
 export default function CalculationResults({ results, onBack }) {
 
     const [currentRound, setCurrentRound] = useState(0);
-
-    useEffect(() => {
-        console.log(results);
-    }, [])
 
     const RoundTable = (tableData) => {
         return <>

@@ -1,9 +1,9 @@
 import { Button } from "@mui/material"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import ParticipantCard from "./ParticipantCard"
 import data from "./testData"
 
-export default ({ onStartGame }) => {
+export default function SetParticipantListForm({ onStartGame }) {
 
 
     const [participants, setParticipants] = useState(data)
