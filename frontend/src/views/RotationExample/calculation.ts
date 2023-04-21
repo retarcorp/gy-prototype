@@ -122,7 +122,7 @@ export default function calculatePositions(participants): CalculationResults {
     return result;
 }
 
-function validateRounds(Tn, Rn, N, rounds) {
+export function validateRounds(Tn, Rn, N, rounds) {
     if (rounds.length !== Rn) {
         throw new Error('Round count is not equal ' + Rn);
     }

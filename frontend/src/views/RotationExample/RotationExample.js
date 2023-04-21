@@ -2,7 +2,7 @@ import { Container, Typography } from '@mui/material'
 import SetParticipantListForm from './SetParticipantListForm';
 import { useState } from 'react';
 import CalculationResults from './CalculationResults';
-import calculatePositions from './calculation.ts';
+import calculatePositions from './robinTournament.ts';
 
 const RotationExample = () => {
 

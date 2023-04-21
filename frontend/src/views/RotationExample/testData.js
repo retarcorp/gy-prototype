@@ -20,9 +20,10 @@ const data = [
     ['Zalán', 'thrower'],
     ['Zoltán', 'chieftain'],
     ['Zsolt', 'happilyeverafter'],
-    // ['Bence', 'bighopes'],
-    // ['Éliás', 'eliahwood'],
-    // ['Gergely', 'victorious']
+    ['Bence', 'bighopes'],
+    ['Éliás', 'eliahwood'],
+    ['Gergely', 'victorious']
+    
 ].map(([n, nn]) => new Participant(n, nn))
 
 export default data;
