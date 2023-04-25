@@ -8,7 +8,7 @@ import WarningIcon from '@mui/icons-material/Warning';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 
-export default function AdminEventCard({ event }: { event: Event }) {
+export default function AdminEventCard({ event, preview = false }: { event: Event; preview: boolean }) {
 
     const draftAlert = <Grid container>
         <WarningIcon color="warning" fontSize="small" style={{ marginRight: '5px' }} />
@@ -58,26 +58,27 @@ export default function AdminEventCard({ event }: { event: Event }) {
 
         </CardContent>
 
+        {!preview ? <>
+            <CardActions>
+                <Grid container justifyContent={'space-between'}>
+                    <Button size="small" color="primary" href={`/admin/events/${event.id}`}>
+                        Open Dashboard
+                    </Button>
 
-        <CardActions>
-            <Grid container justifyContent={'space-between'}>
-                <Button size="small" color="primary" href={`/admin/events/${event.id}`}>
-                    Open Dashboard
-                </Button>
+                    <Grid item>
+                        <Link href={`/admin/events/${event.id}/edit`}>
+                            <IconButton>
+                                <EditIcon />
+                            </IconButton>
+                        </Link>
 
-                <Grid item>
-                    <Link href={`/admin/events/${event.id}/edit`}>
                         <IconButton>
-                            <EditIcon />
+                            <DeleteIcon />
                         </IconButton>
-                    </Link>
-
-                    <IconButton>
-                        <DeleteIcon />
-                    </IconButton>
+                    </Grid>
                 </Grid>
-            </Grid>
 
-        </CardActions>
+            </CardActions>
+        </> : null}
     </Card>
 }
