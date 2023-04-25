@@ -1,4 +1,5 @@
 import './App.css';
+import AdminArea from './views/AdminArea/AdminPage';
 import Facade from './views/Facade/Facade';
 import RotationExample from './views/RotationExample/RotationExample';
 import {
@@ -14,6 +15,10 @@ const router = createBrowserRouter([
   {
     path: "/rotation-example",
     element: <RotationExample></RotationExample>,
+  },
+  {
+    path: "/admin",
+    element: <AdminArea />,
   },
 ]);
 
