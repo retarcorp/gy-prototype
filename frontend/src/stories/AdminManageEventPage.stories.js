@@ -1,4 +1,4 @@
-import AdminManageEvent from "../views/AdminArea/AdminEvents.js/AdminManageEventPage"
+import AdminManageEvent from "../views/AdminArea/AdminEvents/AdminManageEventPage"
 
 export default {
     title: 'Admin/Pages/ManageEvent',

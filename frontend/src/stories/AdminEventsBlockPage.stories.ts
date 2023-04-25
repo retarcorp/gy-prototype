@@ -1,4 +1,4 @@
-import AdminEventsBlock from "../views/AdminArea/AdminEvents.js/AdminEventsBlockPage"
+import AdminEventsBlock from "../views/AdminArea/AdminEvents/AdminEventsBlockPage"
 import { Event } from "../types/Event"
 
 export default {

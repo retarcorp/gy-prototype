@@ -1,6 +1,10 @@
-export default function AdminPage() {
+import withAdminWrapper from "./AdminWrapper"
+
+function AdminPage() {
 
     return <>
-        <h1>Admin Area</h1>
+        
     </>
 }
+
+export default withAdminWrapper(AdminPage)
