@@ -1,5 +1,5 @@
 import { object } from "prop-types"
-import AdminEventCard from "../components/AdminEventCard.tsx"
+import AdminEventCard from "../views/AdminArea/AdminEvents/AdminEventCard.tsx"
 
 export default {
     title: 'Admin/Components/AdminEventCard',

@@ -31,7 +31,7 @@ const descriptions = `1. Get ready for a night of fast-paced romance at our spee
 9. Put yourself out there and join us for a fun and exciting evening of speed dating. You never know who you might meet!
 10. Our speed dating event is a great way to break the ice and make new connections with other singles in your area. Don't miss out on this opportunity to find love!`.split('\n').map(l => l.replace(/^\d+\.\s/, ''))
 
-export default titles.map((title, i) => ({
+const testEvents = titles.map((title, i) => ({
     id: i + 1,
     title,
     description: descriptions[i],
@@ -43,3 +43,25 @@ export default titles.map((title, i) => ({
     isDraft: Math.random() > 0.5
 }))
 
+export default testEvents;
+
+export const testNewEvents = testEvents.map(event => ({
+    ...event,
+    isDraft: null,
+    isParticipating: false,
+    isPast: false,
+})).sort(() => Math.random() - 0.5).slice(0, 5)
+
+export const testUpcomingEvents = testEvents.map(event => ({
+    ...event,
+    isDraft: null,
+    isParticipating: true,
+    isPast: false,
+})).sort(() => Math.random() - 0.5).slice(0, 3)
+
+export const testPastEvents = testEvents.map(event => ({
+    ...event,
+    isDraft: null,
+    isParticipating: true,
+    isPast: true,
+})).sort(() => Math.random() - 0.5).slice(0, 2)

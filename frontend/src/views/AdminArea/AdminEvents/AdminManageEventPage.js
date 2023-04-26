@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, TextField, Typography } from "@mui/material";
 import { useState } from "react";
-import AdminEventCard from "../../../components/AdminEventCard.tsx";
+import AdminEventCard from "./AdminEventCard.tsx";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 export default function AdminManageEventPage() {

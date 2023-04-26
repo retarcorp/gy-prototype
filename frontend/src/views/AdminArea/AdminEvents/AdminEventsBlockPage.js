@@ -1,5 +1,5 @@
 import { Grid, Typography } from "@mui/material"
-import AdminEventCard from "../../../components/AdminEventCard.tsx"
+import AdminEventCard from "./AdminEventCard.tsx"
 import events from "../../../testData/events.ts"
 import { Fragment } from "react"
 

@@ -1,10 +1,7 @@
 import withAdminWrapper from "./AdminWrapper"
 
 function AdminPage() {
-
-    return <>
-        
-    </>
+    return <> </>
 }
 
 export default withAdminWrapper(AdminPage)
