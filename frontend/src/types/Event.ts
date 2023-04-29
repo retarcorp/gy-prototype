@@ -8,5 +8,6 @@ export type Event = {
     participantLimit: number;
     participantCount: number;
     isDraft: boolean;
+    status?: 'upcoming' | 'opened' | 'running' | 'final' | 'closed';
 
 }

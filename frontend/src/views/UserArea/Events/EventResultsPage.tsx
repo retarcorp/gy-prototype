@@ -1,7 +1,7 @@
 import { Avatar, Box, Button, Card, CardContent, CardHeader, Checkbox, Divider, Grid, Tab, Tabs, Typography } from '@mui/material';
 import React, { useEffect } from 'react';
 import EventCard from '../../../components/EventCard';
-import testEvents, { testPastEvents } from '../../../testData/events';
+import { testPastEvents } from '../../../testData/events';
 import participants from '../../../testData/participants.js'
 
 type EventResultsPageProps = {}
