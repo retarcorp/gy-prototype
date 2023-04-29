@@ -1,7 +1,7 @@
 import { Button } from "@mui/material"
 import { useState } from "react"
 import ParticipantCard from "./ParticipantCard"
-import data from "./testData"
+import data from "../../testData/participants"
 
 export default function SetParticipantListForm({ onStartGame }) {
 

@@ -3,6 +3,8 @@ import React from "react";
 
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 type EventEnrollmentProps = {
 }
@@ -34,11 +36,13 @@ export default function EventParticipance(props: EventEnrollmentProps) {
                         </Avatar>
                     }
                     action={
-
-                        <Checkbox
-                            checkedIcon={<FavoriteIcon color="success" />}
-                            icon={<FavoriteBorderIcon color="disabled" />}
-                        />
+                        <>
+                            <Checkbox
+                                checkedIcon={<FavoriteIcon color="success" />}
+                                icon={<FavoriteBorderIcon color="disabled" />}
+                            />
+                            
+                        </>
                     }
                     title="Alex"
                     subheader="I feel good"
