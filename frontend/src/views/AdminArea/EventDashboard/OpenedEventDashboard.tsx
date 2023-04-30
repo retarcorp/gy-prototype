@@ -46,6 +46,7 @@ export default function OpenedEventDashboard(props: OpenedEventDashboardProps) {
 
             <Box padding={1}>
                 <TextField label="PIN" variant="outlined" fullWidth type='number' />
+                <Typography variant="caption">The PIN is displayed on the other device. You can also scan QR on user's device instead.</Typography>
             </Box>
 
             <DialogActions>
