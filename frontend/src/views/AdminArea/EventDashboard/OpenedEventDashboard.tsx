@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import EventCard from '../../../components/EventCard';
 import { Event } from "../../../types/Event";
-import { Box, Button, Grid, IconButton, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogTitle, Grid, IconButton, TextField, Typography } from '@mui/material';
 import UserCard from '../../../components/UserCard.tsx';
 import testParticipants from '../../../testData/participants.js'
 import LoginIcon from '@mui/icons-material/Login';
@@ -21,9 +21,16 @@ export default function OpenedEventDashboard(props: OpenedEventDashboardProps) {
         setRegistrants(shuffled.slice(10));
     }, []);
 
-    const enroll = (p: any) => {
-        setParticipants([...participants, p]);
-        setRegistrants(registrants.filter(r => r.nickname !== p.nickname));
+    const [open, setOpen] = React.useState(false);
+    const [currentParticipant, setCurrentParticipant] = React.useState<any>(null);
+    const onTryEnroll = (p: any) => {
+        setOpen(true);
+        setCurrentParticipant(p);
+    }
+    const enroll = () => {
+        setOpen(false);
+        setParticipants([...participants, currentParticipant]);
+        setRegistrants(registrants.filter(r => r.nickname !== currentParticipant.nickname));
     }
 
     const unEnroll = (p: any) => {
@@ -33,6 +40,19 @@ export default function OpenedEventDashboard(props: OpenedEventDashboardProps) {
 
 
     return <Box>
+
+        <Dialog open={open}>
+            <DialogTitle>Enter PIN from his device:</DialogTitle>
+
+            <Box padding={1}>
+                <TextField label="PIN" variant="outlined" fullWidth type='number' />
+            </Box>
+
+            <DialogActions>
+                <Button variant="contained" color="success" onClick={enroll}>Add</Button>
+                <Button variant="contained" color="error" onClick={() => setOpen(false)}>Cancel</Button>
+            </DialogActions>
+        </Dialog>
 
         <Grid container spacing={2}>
             <Grid item xs={12} lg={6} xl={4}>
@@ -63,7 +83,7 @@ export default function OpenedEventDashboard(props: OpenedEventDashboardProps) {
                         <Grid container spacing={1}>
                             {registrants.map(p => <Grid key={p.nickname} item xs={12} sm={12} md={6} lg={12} xl={12} >
                                 <UserCard title={p.name + '(' + p.nickname + ')'} subtitle={p.phone + ' | ' + p.email} >
-                                    <IconButton onClick={() => enroll(p)}>
+                                    <IconButton onClick={() => onTryEnroll(p)}>
                                         <LoginIcon />
                                     </IconButton>
                                 </UserCard>

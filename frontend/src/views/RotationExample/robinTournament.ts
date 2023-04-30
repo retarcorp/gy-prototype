@@ -1,5 +1,5 @@
 import { validateRounds } from "./calculation.ts";
-import colors from "./colors";
+import colors from "../../testData/colors.js";
 
 type Table = {
     id: string;
