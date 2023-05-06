@@ -13,7 +13,6 @@ datasource db {
 
 model User {
   id                  Int     @id @default(autoincrement())
-  firebaseId          String  @unique
   isAdmin             Boolean @default(false)
   onboardingCompleted Boolean @default(false)
   email               String  @unique
@@ -22,6 +21,7 @@ model User {
   contactsForMatches  String? @default("")
   contactsForLikes    String? @default("")
 
+  auth                UserAuth?
   events              Participant[]
   registrations       Registration[]
   notes               UserNotes[]            @relation(name: "author")
@@ -29,6 +29,15 @@ model User {
   likedBy             GameLikes[]            @relation(name: "likeTarget")
   gameResults         GameUserResultRecord[] @relation(name: "resultOwner")
   gameResultsAsTarget GameUserResultRecord[] @relation(name: "resultTarget")
+}
+
+model UserAuth {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int  @unique
+  token  String
+  expiry DateTime
+  passwordHash String?
 }
 
 enum EventStatus {
