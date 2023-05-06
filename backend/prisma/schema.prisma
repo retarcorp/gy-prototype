@@ -12,7 +12,153 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String? @default("")
+  id                  Int     @id @default(autoincrement())
+  firebaseId          String  @unique
+  isAdmin             Boolean @default(false)
+  onboardingCompleted Boolean @default(false)
+  email               String  @unique
+  name                String? @default("")
+  aboutMe             String? @default("")
+  contactsForMatches  String? @default("")
+  contactsForLikes    String? @default("")
+
+  events              Participant[]
+  registrations       Registration[]
+  notes               UserNotes[]            @relation(name: "author")
+  likes               GameLikes[]            @relation(name: "likeSender")
+  likedBy             GameLikes[]            @relation(name: "likeTarget")
+  gameResults         GameUserResultRecord[] @relation(name: "resultOwner")
+  gameResultsAsTarget GameUserResultRecord[] @relation(name: "resultTarget")
+}
+
+enum EventStatus {
+  DRAFT
+  UPCOMING
+  OPEN
+  RUNNING
+  FINAL
+  CLOSED
+  CANCELLED
+}
+
+model Event {
+  id               Int         @id @default(autoincrement())
+  title            String
+  description      String
+  location         String
+  price            String
+  participantLimit Int
+  datetime         DateTime
+  status           EventStatus @default(OPEN)
+
+  participants  Participant[]
+  registrations Registration[]
+  game          Game?
+}
+
+model Registration {
+  id            Int    @id @default(autoincrement())
+  user          User   @relation(fields: [userId], references: [id])
+  userId        Int
+  event         Event  @relation(fields: [eventId], references: [id])
+  eventId       Int
+  enrollmentPIN String
+}
+
+model Participant {
+  id      Int   @id @default(autoincrement())
+  event   Event @relation(fields: [eventId], references: [id])
+  eventId Int
+  user    User  @relation(fields: [userId], references: [id])
+  gameId  Int?
+  game    Game? @relation(fields: [gameId], references: [id])
+  userId  Int
+
+  tableArrangementsAsA TableArrangement[] @relation(name: "participantA")
+  tableArrangementsAsB TableArrangement[] @relation(name: "participantB")
+}
+
+enum GameStatus {
+  PREPARED
+  RUNNING
+  FINAL
+  CLOSED
+}
+
+model Game {
+  id      Int        @id @default(autoincrement())
+  eventId Int        @unique
+  event   Event      @relation(fields: [eventId], references: [id])
+  status  GameStatus @default(PREPARED)
+
+  participants  Participant[]
+  tables        Table[]
+  rounds        Round[]
+  Likes         GameLikes[]
+  resultRecords GameUserResultRecord[]
+}
+
+model Table {
+  id     Int    @id @default(autoincrement())
+  title  String
+  gameId Int
+  game   Game   @relation(fields: [gameId], references: [id])
+
+  tableArrangements TableArrangement[]
+}
+
+model Round {
+  id     Int  @id @default(autoincrement())
+  gameId Int
+  game   Game @relation(fields: [gameId], references: [id])
+  index  Int
+
+  tableArrangements TableArrangement[]
+}
+
+model TableArrangement {
+  id             Int         @id @default(autoincrement())
+  tableId        Int
+  table          Table       @relation(fields: [tableId], references: [id])
+  roundId        Int
+  round          Round       @relation(fields: [roundId], references: [id])
+  participantAId Int
+  participantA   Participant @relation(name: "participantA", fields: [participantAId], references: [id])
+  participantBId Int
+  participantB   Participant @relation(name: "participantB", fields: [participantBId], references: [id])
+}
+
+model UserNotes {
+  id           Int    @id @default(autoincrement())
+  userId       Int
+  user         User   @relation(name: "author", fields: [userId], references: [id])
+  targetUserId Int
+  notes        String
+}
+
+model GameLikes {
+  id           Int  @id @default(autoincrement())
+  gameId       Int
+  game         Game @relation(fields: [gameId], references: [id])
+  userId       Int
+  user         User @relation(name: "likeSender", fields: [userId], references: [id])
+  targetUserId Int
+  targetUser   User @relation(name: "likeTarget", fields: [targetUserId], references: [id])
+}
+
+enum ResutlType {
+  NONE
+  MATCH
+  LIKEDBY
+}
+
+model GameUserResultRecord {
+  id           Int        @id @default(autoincrement())
+  gameId       Int
+  game         Game       @relation(fields: [gameId], references: [id])
+  userId       Int
+  user         User       @relation(name: "resultOwner", fields: [userId], references: [id])
+  targetUserId Int
+  targetUser   User       @relation("resultTarget", fields: [targetUserId], references: [id])
+  type         ResutlType
 }
