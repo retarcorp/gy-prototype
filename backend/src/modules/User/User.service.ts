@@ -22,4 +22,24 @@ export class UserService {
     async signIn(email: string, password: string): Promise<any> {
         return this.authService.signIn(email, password);
     }
+
+    async putOnboardingData(userId: number, onboardingData: any): Promise<any> {
+        
+        return await this.prismaService.user.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                phone: onboardingData.phone,
+                name: onboardingData.name,
+                nickname: onboardingData.nickname,
+                aboutMe: onboardingData.aboutMe,
+                contactsForLikes: onboardingData.contactsForLikes,
+                contactsForMatches: onboardingData.contactsForMatches,
+                onboardingCompleted: true,
+                
+            }
+        })
+
+    }
 }

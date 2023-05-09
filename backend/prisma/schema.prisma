@@ -16,7 +16,9 @@ model User {
   isAdmin             Boolean @default(false)
   onboardingCompleted Boolean @default(false)
   email               String  @unique
+  phone               String  @default("")
   name                String? @default("")
+  nickname            String? @default("")
   aboutMe             String? @default("")
   contactsForMatches  String? @default("")
   contactsForLikes    String? @default("")
@@ -32,11 +34,11 @@ model User {
 }
 
 model UserAuth {
-  id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  userId Int  @unique
-  token  String
-  expiry DateTime
+  id           Int      @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       Int      @unique
+  token        String
+  expiry       DateTime
   passwordHash String?
 }
 

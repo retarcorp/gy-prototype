@@ -37,7 +37,7 @@ export class AuthGuard implements CanActivate {
 }
 
 @Injectable()
-export class CurrentUserInterceptor implements NestInterceptor {
+class CurrentUserInterceptor implements NestInterceptor {
     constructor(
         protected readonly authService: AuthService,
     ) { }
@@ -69,7 +69,7 @@ export const AdminOnly = () => applyDecorators(
     WithAuth()
 );
 
-export const CurrentUser = createParamDecorator((data: unknown, context: ExecutionContext & { currentUser: unknown }) => {
+export const CurrentUser = createParamDecorator((data: keyof User | null, context: ExecutionContext & { currentUser: unknown }) => {
     const request: Request & { currentUser?: User } = context.switchToHttp().getRequest();
-    return request.currentUser || null;
+    return request.currentUser ? (data ? request.currentUser[data] : request.currentUser) : null;
 })
