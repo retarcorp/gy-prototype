@@ -60,7 +60,7 @@ model Event {
   price            String
   participantLimit Int
   datetime         DateTime
-  status           EventStatus @default(OPEN)
+  status           EventStatus @default(UPCOMING)
 
   participants  Participant[]
   registrations Registration[]
