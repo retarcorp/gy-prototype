@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
-import { User as UserModel } from '@prisma/client';
+import { Body, Controller, Get, HttpException, HttpStatus, Post, UseInterceptors } from '@nestjs/common';
+import { User, User as UserModel } from '@prisma/client';
 import { PrismaService } from 'src/utils/prisma.service';
 import { UserService } from './User.service';
+import {  AdminOnly, CurrentUser, CurrentUserInterceptor, WithAuth } from './Auth.guards';
 
 @Controller()
 export class UserController {
@@ -23,6 +24,22 @@ export class UserController {
 
   @Post('/users/signin')
   async signIn(@Body('email') email: string, @Body('password') password: string): Promise<any> {
-    return this.userService.signIn(email, password);
+    try {
+      return this.userService.signIn(email, password);
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.FORBIDDEN);
+    }
+  }
+
+  @Get('/users/validate')
+  @WithAuth()
+  async validateAuth(@CurrentUser() user: User): Promise<any> {
+    return { valid: true, user };
+  }
+
+  @Get('/admin/validate')
+  @AdminOnly()
+  async validateAdmin(@CurrentUser() user: User): Promise<any> {
+    return { valid: true, user };
   }
 }

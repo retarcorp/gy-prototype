@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { User as UserModel } from '@prisma/client';
 import { PrismaService } from 'src/utils/prisma.service';
 import AuthService from './Auth.service';
@@ -20,6 +20,6 @@ export class UserService {
     }
 
     async signIn(email: string, password: string): Promise<any> {
-        // return this.firebaseService.signInUser(email, password);
+        return this.authService.signIn(email, password);
     }
 }
