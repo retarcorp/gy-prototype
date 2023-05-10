@@ -1,0 +1,560 @@
+{
+	"info": {
+		"_postman_id": "7bb77ac7-7e8e-41e2-b0e2-17a8d129db66",
+		"name": "GotYou API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6243075"
+	},
+	"item": [
+		{
+			"name": "Events",
+			"item": [
+				{
+					"name": "User",
+					"item": [
+						{
+							"name": "Get Available Events",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/available",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"available"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Registrations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/registered",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"registered"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Participated",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/participated",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"participated"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register on Event",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "urlencoded",
+									"urlencoded": []
+								},
+								"url": {
+									"raw": "{{host}}/events/5/registration",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"5",
+										"registration"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Unregister from Event",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/events/5/registration",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"events",
+										"5",
+										"registration"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Events List",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{authToken}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/events",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "{{$randomLoremWords}}",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "{{$randomLoremLines}}",
+									"type": "text"
+								},
+								{
+									"key": "location",
+									"value": "{{$randomStreetAddress}}",
+									"type": "text"
+								},
+								{
+									"key": "price",
+									"value": "{{$randomPrice}}",
+									"type": "text"
+								},
+								{
+									"key": "participantLimit",
+									"value": "25",
+									"type": "text"
+								},
+								{
+									"key": "datetime",
+									"value": "{{$randomDateFuture}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/events",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Event",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "{{$randomLoremWords}} - Updated!!",
+									"type": "text"
+								},
+								{
+									"key": "description",
+									"value": "{{$randomLoremLines}}",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "location",
+									"value": "{{$randomStreetAddress}}",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "price",
+									"value": "{{$randomPrice}}",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "participantLimit",
+									"value": "25",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "datetime",
+									"value": "{{$randomDateFuture}}",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "{{host}}/events/3",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events",
+								"3"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Event",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/events/2",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Event Dashboard",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/events/6/dashboard",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events",
+								"6",
+								"dashboard"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Registration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/events/5/registration/validate/5/7116",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events",
+								"5",
+								"registration",
+								"validate",
+								"5",
+								"7116"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Enroll on Event",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{host}}/events/5/registration/validate/5/7116",
+							"host": [
+								"{{host}}"
+							],
+							"path": [
+								"events",
+								"5",
+								"registration",
+								"validate",
+								"5",
+								"7116"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Register User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "use3r2@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456789",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{host}}/users",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "SIgn In User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "use3r2@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456789",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{host}}/users/signin",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						"signin"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Auth",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "88473810efbf4359a83d0be3940c58226d186537",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/users/validate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Validate Admin Auth",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "88473810efbf4359a83d0be3940c58226d186537",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{host}}/admin/validate",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"admin",
+						"validate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put Onboarding Data",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "88473810efbf4359a83d0be3940c58226d186537",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "phone",
+							"value": "+123456789",
+							"type": "text"
+						},
+						{
+							"key": "aboutMe",
+							"value": "Nothing to tell about me...",
+							"type": "text"
+						},
+						{
+							"key": "contactsForMatches",
+							"value": "If you want to contact me as match, see my Instagram: @instagram",
+							"type": "text"
+						},
+						{
+							"key": "contactsForLikes",
+							"value": "I appreciate your like but I don't accept connection request from non-matches.\n",
+							"type": "text"
+						},
+						{
+							"key": "name",
+							"value": "Laszlo",
+							"type": "text"
+						},
+						{
+							"key": "nickname",
+							"value": "lsz_nck",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{host}}/users/5/onboarding",
+					"host": [
+						"{{host}}"
+					],
+					"path": [
+						"users",
+						"5",
+						"onboarding"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "88473810efbf4359a83d0be3940c58226d186537"
+		}
+	]
+}
