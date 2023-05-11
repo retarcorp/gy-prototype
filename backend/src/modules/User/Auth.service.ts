@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { PrismaClient, User, UserAuth } from "@prisma/client";
-import { TOKEN_LIFETIME } from 'src/config/app.config';
+import { TOKEN_LIFETIME } from '../../config/app.config';
 const sha1 = require('sha1');
 
 // declare function sha1(str: string): string
@@ -8,7 +8,7 @@ const sha1 = require('sha1');
 export default class AuthService {
     constructor(private readonly prismaClient: PrismaClient) { }
 
-    async registerUser(email: string, password: string): Promise<any> {
+    async registerUser(email: string, password: string): Promise<{user: User, auth: UserAuth}> {
 
         const user: User = await this.prismaClient.user.create({
             data: {

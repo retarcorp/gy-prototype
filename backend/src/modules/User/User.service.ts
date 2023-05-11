@@ -1,12 +1,11 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { User as UserModel } from '@prisma/client';
-import { PrismaService } from 'src/utils/prisma.service';
+import { PrismaClient, User, UserAuth, User as UserModel } from '@prisma/client';
 import AuthService from './Auth.service';
 
 @Injectable()
 export class UserService {
 
-    constructor(private readonly prismaService: PrismaService,
+    constructor(private readonly PrismaClient: PrismaClient,
         private readonly authService: AuthService
     ) { }
 
@@ -14,7 +13,7 @@ export class UserService {
         return 'Hello World!';
     }
 
-    async registerUser(email: string, password: string): Promise<UserModel> {
+    async registerUser(email: string, password: string): Promise<{user: User, auth: UserAuth}> {
         // return this.firebaseService.registerUser(email, password);
         return this.authService.registerUser(email, password);
     }
@@ -25,7 +24,7 @@ export class UserService {
 
     async putOnboardingData(userId: number, onboardingData: any): Promise<any> {
         
-        return await this.prismaService.user.update({
+        return await this.PrismaClient.user.update({
             where: {
                 id: userId,
             },

@@ -97,10 +97,11 @@ enum GameStatus {
 }
 
 model Game {
-  id      Int        @id @default(autoincrement())
-  eventId Int        @unique
-  event   Event      @relation(fields: [eventId], references: [id])
-  status  GameStatus @default(PREPARED)
+  id             Int        @id @default(autoincrement())
+  eventId        Int        @unique
+  event          Event      @relation(fields: [eventId], references: [id])
+  status         GameStatus @default(PREPARED)
+  currentRoundId Int?
 
   participants  Participant[]
   tables        Table[]
