@@ -27,13 +27,19 @@ export class EventsService {
         });
     }
 
-    async updateEvent(eventId: number, eventData: Event): Promise<Event> {
+    async updateEvent(eventId: number, eventData: Partial<Event>): Promise<Event> {
 
         const event = await this.prismaClient.event.findUnique({
             where: {
                 id: eventId,
             }
         });
+
+        const allowedFields = ['title', 'description', 'location', 'price', 'participantLimit', 'datetime', 'status'];
+
+        const eventEdit: Partial<Event> =
+            allowedFields.reduce((prev: Partial<Event>, key: string) => key in eventData ? { [key]: eventData[key], ...prev } : prev, {});
+
 
         if (!([EventStatus.DRAFT, EventStatus.UPCOMING] as EventStatus[]).includes(event.status)) {
             throw new HttpException('Cannot update event that is not in draft or upcoming status', HttpStatus.FORBIDDEN);
@@ -43,15 +49,7 @@ export class EventsService {
             where: {
                 id: eventId,
             },
-            data: {
-                title: eventData.title,
-                description: eventData.description,
-                location: eventData.location,
-                price: eventData.price,
-                participantLimit: eventData.participantLimit,
-                datetime: eventData.datetime,
-                status: eventData.status,
-            }
+            data: eventEdit
         })
     }
 

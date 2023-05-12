@@ -2,6 +2,7 @@ import { EventStatus, PrismaClient } from "@prisma/client";
 import { EventsService } from "../modules/Event/events.service";
 import { UserService } from "../modules/User/User.service";
 import AuthService from "../modules/User/Auth.service";
+import { GameService } from "../modules/Game/game.service";
 
 describe('Main app flow test', () => {
 
@@ -9,12 +10,14 @@ describe('Main app flow test', () => {
     let prismaClient: PrismaClient;
     let userService: UserService;
     let authService: AuthService;
+    let gameService: GameService;
 
     beforeEach(() => {
         prismaClient = new PrismaClient();
         eventService = new EventsService(prismaClient);
         authService = new AuthService(prismaClient);
         userService = new UserService(prismaClient, authService);
+        gameService = new GameService(prismaClient);
 
     })
 
@@ -35,6 +38,26 @@ describe('Main app flow test', () => {
                 datetime: new Date(),
             }
         }
+
+        const getUsers = async () => await prismaClient.user.findMany({
+            where: {
+                email: {
+                    in: testSuit.emails
+                }
+            }
+        });
+
+
+        const getEvent = async () => prismaClient.event.findFirst({
+            where: {
+                title: testSuit.eventData.title
+            }
+        });
+
+        const getGame = async () => prismaClient.game.findFirst({
+            where: { eventId: (await getEvent()).id }
+        });
+
 
         it('Can load all events', async () => {
             const events = await eventService.getEvents();
@@ -106,9 +129,94 @@ describe('Main app flow test', () => {
             console.log(`Created event: ${event.title}`);
         })
 
+        // Step 3. Register all users to this event
+        it('Registering all users on events', async () => {
+            const users = await getUsers();
+            const event = await getEvent();
+
+            await Promise.all(users.map(user => eventService.registerOnEvent(user.id, event.id)));
+
+            const dbRegistrations = await prismaClient.registration.findMany({
+                where: {
+                    eventId: event.id
+                }
+            });
+
+            expect(dbRegistrations).toHaveLength(users.length);
+        })
+
+        // Step 4. Open event for enrollment
+        it('Opening event for enrollment', async () => {
+            const event = await getEvent();
+
+            await eventService.updateEvent(event.id, {
+                status: EventStatus.OPEN
+            });
+
+            const dbEvent = await prismaClient.event.findUnique({
+                where: {
+                    id: event.id
+                }
+            });
+
+            expect(dbEvent.status).toBe(EventStatus.OPEN);
+        })
+
+
+        // Step 5. Enroll all users to event
+        it('Enrolls all users to event', async () => {
+            const event = await getEvent();
+            const registrations = await prismaClient.registration.findMany({
+                where: {
+                    eventId: event.id
+                }
+            });
+
+            await Promise.all(registrations.map(r => eventService.enrollOnEvent(r.id)));
+
+            const participants = await prismaClient.participant.findMany({ where: { eventId: event.id } });
+            
+            expect(participants).toHaveLength(registrations.length);
+        });
+
+        // Step 6. Start game
+        it('Starts game', async () => {
+            const event = await getEvent();
+
+            const game = await gameService.startGame(event.id);
+            console.log(game);
+
+            const dbEvent = await prismaClient.event.findUnique({
+                where: {
+                    id: event.id
+                }
+            });
+
+            // Check rounds count
+            // Check tables count
+            // Check table arrangements count and data
+
+            expect(dbEvent.status).toBe(EventStatus.RUNNING);
+        });
+        
+
+
         afterAll(async () => {
 
             const { emails, eventData } = testSuit;
+
+            const event = await getEvent();
+            const game = await getGame();
+
+            const tables = await prismaClient.table.findMany({ where: { gameId: game.id } });
+            await Promise.all(tables.map(table => prismaClient.tableArrangement.deleteMany({ where: { tableId: table.id } })));
+            await prismaClient.table.deleteMany({ where: { gameId: game.id } });
+            await prismaClient.round.deleteMany({ where: { gameId: game.id } });
+            await prismaClient.game.deleteMany({ where: { id: game.id } })
+
+
+            await prismaClient.participant.deleteMany({ where: { eventId: event.id } })
+            await prismaClient.registration.deleteMany({ where: { eventId: event.id } })
 
             const deleteUser = async (email) => {
 
@@ -122,15 +230,5 @@ describe('Main app flow test', () => {
 
             await prismaClient.event.deleteMany({ where: { title: eventData.title } })
         })
-
-        // Step 3. Register all users to this event
-        // Step 4. Open event for enrollment
-        // Step 5. Enroll all users to event
-        // Step 6. Start game
-
-
-
-
-
     })
 })

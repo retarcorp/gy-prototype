@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EventStatus, Game, GameStatus, PrismaClient } from '@prisma/client';
-import colors from 'src/config/colors';
-import calculatePositions, { CalculatedRound, TableRound } from 'src/utils/calculation';
+import colors from '../../config/colors';
+import calculatePositions, { CalculatedRound, TableRound } from '../../utils/calculation';
 
 @Injectable()
 export class GameService {
@@ -16,12 +16,8 @@ export class GameService {
     async startGame(eventId: number): Promise<Game> {
         // Step 1. Get event
         const event = await this.prismaClient.event.findUnique({
-            where: {
-                id: eventId,
-            },
-            include: {
-                participants: true
-            }
+            where: { id: eventId, },
+            include: { participants: true }
         });
 
         if (event.status !== EventStatus.OPEN) {
