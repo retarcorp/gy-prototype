@@ -134,10 +134,10 @@ model TableArrangement {
   table          Table       @relation(fields: [tableId], references: [id])
   roundId        Int
   round          Round       @relation(fields: [roundId], references: [id])
-  participantAId Int
-  participantA   Participant @relation(name: "participantA", fields: [participantAId], references: [id])
-  participantBId Int
-  participantB   Participant @relation(name: "participantB", fields: [participantBId], references: [id])
+  participantAId Int?
+  participantA   Participant? @relation(name: "participantA", fields: [participantAId], references: [id])
+  participantBId Int?
+  participantB   Participant? @relation(name: "participantB", fields: [participantBId], references: [id])
 }
 
 model UserNotes {

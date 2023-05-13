@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { EventStatus, Game, GameStatus, PrismaClient } from '@prisma/client';
+import { EventStatus, Game, GameStatus, Participant, PrismaClient, Round } from '@prisma/client';
 import colors from '../../config/colors';
 import calculatePositions, { CalculatedRound, TableRound } from '../../utils/calculation';
+import { GameSetup, RoundSetup } from 'src/types/game';
 
 @Injectable()
 export class GameService {
     constructor(
         private readonly prismaClient: PrismaClient,
-    ) {
-
-    }
+    ) {}
 
 
     // Refactor - create game builder/fabric
@@ -103,7 +102,7 @@ export class GameService {
                 id: game.id,
             },
             data: {
-                currentRoundId: 0,
+                currentRoundId: tableRounds.find((r) => r.index === 0).id,
                 status: GameStatus.RUNNING,
             }
         });
@@ -122,36 +121,87 @@ export class GameService {
         return startedGame;
     }
 
-    async testGame(): Promise<never> {
-        // Step 1. Register N users
-        // Step 2. Create event and put in appropriate status
-        // Step 3. Register all users to this event
-        // Step 4. Open event for enrollment
-        // Step 5. Enroll all users to event
-        // Step 6. Start game
-
-
-
-        throw new Error('Not implemented');
-    }
-
     async getGameByEventId(eventId: number): Promise<Game> {
-
-        return null as never;
+        return await this.prismaClient.game.findUnique({ where: { eventId: eventId }, });
     }
 
     async getGameById(gameId: number): Promise<Game> {
+        const game = await this.prismaClient.game.findUnique({ where: { id: gameId }, });
+        if (!game) {
+            throw new Error('Game not found!');
+        }
+        return game;
+    }
+    async getGameSetup(gameId: number): Promise<GameSetup> {
 
-        return null as never;
+        const game = await this.getGameById(gameId);
+        const participants = await this.prismaClient.participant.findMany({
+            where: { eventId: game.eventId },
+            include: { user: true }
+        });
+        const tables = await this.prismaClient.table.findMany({ where: { gameId: gameId } });
+        const rounds = await this.prismaClient.round.findMany({ where: { gameId: gameId } });
+        const tableArrangements = await this.prismaClient.tableArrangement.findMany({
+            where: {
+                roundId: { in: rounds.map((r) => r.id), }
+            }
+        });
+
+        return {
+            ...game,
+            participants: participants,
+            tables: tables,
+            rounds: rounds.sort((r1, r2) => r1.index - r2.index),
+            tableArrangements: tableArrangements,
+        }
+    }
+
+    async getCurrentRoundSetup(gameId: number): Promise<RoundSetup> {
+
+        const round = await this.prismaClient.round.findUnique({
+            where: {
+                id: (await this.getGameById(gameId)).currentRoundId,
+            },
+            include: {
+                tableArrangements: true
+            }
+        });
+        const tables = await this.prismaClient.table.findMany({ where: { gameId: gameId } });
+
+        return {
+            ...round,
+            tables: tables,
+        }
     }
 
     async moveGameToNextRound(gameId: number): Promise<Game> {
+        const game: Game = await this.getGameById(gameId);
+        const rounds: Round[] = await this.prismaClient.round.findMany({ where: { gameId: gameId } });
+        const currentRoundIndex = rounds.find((r) => r.id === game.currentRoundId).index;
 
-        return null as never;
+        if (currentRoundIndex === rounds.length - 1) {
+            // Game final
+            game.status = GameStatus.FINAL;
+            game.currentRoundId = null;
+            await this.prismaClient.game.update({ where: { id: gameId }, data: { status: GameStatus.FINAL, currentRoundId: null } });
+            await this.prismaClient.event.update({ where: { id: game.eventId }, data: { status: EventStatus.FINAL } });
+        } else {
+            const nextRoundId = rounds.find((r) => r.index === currentRoundIndex + 1)?.id;
+            game.currentRoundId = nextRoundId;
+            await this.prismaClient.game.update({ where: { id: gameId }, data: { currentRoundId: nextRoundId } });
+        }
+        return game;
     }
 
     async closeGame(gameId: number): Promise<Game> {
+        const game: Game = await this.getGameById(gameId);
+        if (game.status !== GameStatus.FINAL) {
+            throw new Error('Game is not in final status!');
+        }
+        game.status = GameStatus.CLOSED;
+        await this.prismaClient.game.update({ where: { id: gameId }, data: { status: GameStatus.CLOSED } });
 
-        return null as never;
+        return game;
     }
+
 }

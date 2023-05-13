@@ -1,4 +1,4 @@
-import { EventStatus, PrismaClient } from "@prisma/client";
+import { EventStatus, GameStatus, PrismaClient } from "@prisma/client";
 import { EventsService } from "../modules/Event/events.service";
 import { UserService } from "../modules/User/User.service";
 import AuthService from "../modules/User/Auth.service";
@@ -28,12 +28,12 @@ describe('Main app flow test', () => {
         }
 
         const testSuit = {
-            emails: new Array(10).fill(0).map((_, i) => `test-${i}@example.com`),
+            emails: new Array(5).fill(0).map((_, i) => `test-${i}-${Math.round(Math.random() * 10 ** 8)}@example.com`),
             eventData: {
                 title: 'Test Event ' + new Date().getTime(),
                 description: 'Test Description',
                 location: 'Test Location',
-                participantLimit: 10,
+                participantLimit: 20,
                 price: 1000 + ' HUF',
                 datetime: new Date(),
             }
@@ -184,20 +184,70 @@ describe('Main app flow test', () => {
             const event = await getEvent();
 
             const game = await gameService.startGame(event.id);
-            console.log(game);
-
             const dbEvent = await prismaClient.event.findUnique({
                 where: {
                     id: event.id
                 }
             });
 
+            const participants = await prismaClient.participant.findMany({ where: { eventId: event.id } });
+
             // Check rounds count
+            const dbRounds = await prismaClient.round.findMany({ where: { gameId: game.id } });
+            expect(dbRounds).toHaveLength(Math.ceil(participants.length / 2) * 2 - 1);
+
             // Check tables count
             // Check table arrangements count and data
 
             expect(dbEvent.status).toBe(EventStatus.RUNNING);
         });
+
+        // Step X. Move game to next round
+        it('Game can move to the next rounds till final', async () => {
+
+            const mainGame = await getGame();
+            const gameSetup = await gameService.getGameSetup(mainGame.id);
+            console.log(gameSetup);
+            const dbRounds = await prismaClient.round.findMany({ where: { gameId: mainGame.id } });
+
+            for (let i = 1; i < dbRounds.length; i++) {
+                await gameService.moveGameToNextRound(mainGame.id);
+                const game = await getGame();
+
+                const expectedRoundId = gameSetup.rounds[i].id;
+                console.log(expectedRoundId, game.currentRoundId, i);
+
+                expect(game.currentRoundId).toBe(expectedRoundId);
+                
+                const roundSetup = await gameService.getCurrentRoundSetup(game.id);
+                expect(roundSetup).toBeDefined();
+                expect(roundSetup.index).toBe(i);
+                expect(roundSetup.id).toBe(expectedRoundId);
+            }
+            await gameService.moveGameToNextRound(mainGame.id);
+            const game = await getGame();
+
+            expect(game.currentRoundId).toBe(null);
+            expect(game.status).toBe(GameStatus.FINAL);
+
+            const event = await getEvent();
+            expect(event.status).toBe(EventStatus.FINAL);
+
+        })
+
+        // Step X. User may save notes and put likes
+
+        // Step X. Finalize game
+
+        // Step X. User may save notes and put likes
+
+        // Step X. Close game
+
+        // Step X. User may see the results of a game - likes, contacts, notes
+
+        // Step X. User may see list of past events and see their results
+
+
         
 
 

@@ -1,3 +1,5 @@
+import { writeFileSync } from "fs";
+
 type Participant = number;
 
 export type TableRound = {
@@ -16,6 +18,8 @@ export function validateRounds(Tn, Rn, N, rounds) {
         throw new Error('Round count is not equal ' + Rn);
     }
     if (rounds.some(r => r.length !== Tn)) {
+        console.log(rounds, rounds.map(r => r.length));
+        console.log(Tn)
         throw new Error('Some rounds have incorrect amount of tables!')
     }
     const flattened = rounds.flat(1).map(String);
@@ -36,16 +40,16 @@ export default function calculatePositions(participants: number[], tables: numbe
     const tableCount: number = tables.length;
     const operatingParticipants = [...participants];
 
-    if (participants.length % 2 === 1) {
+    if (operatingParticipants.length % 2 === 1) {
         operatingParticipants.push(null)
     }
 
-    const roundCount: number = participants.length - 1;
+    const roundCount: number = operatingParticipants.length - 1;
     const Tn = tableCount;
     const Rn = roundCount;
-    const N = participants.length;
+    const N = operatingParticipants.length;
 
-    const indices: number[] = participants.map((_, i) => i);
+    const indices: number[] = operatingParticipants.map((_, i) => i);
 
     const topTable = indices.slice(0, indices.length / 2);
     const bottomTable = indices.slice(indices.length / 2);
