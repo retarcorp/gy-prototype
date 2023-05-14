@@ -41,4 +41,13 @@ export class UserService {
         })
 
     }
+
+    getPublicProfile(user: UserModel): Partial<UserModel> {
+        return {
+            id: user.id,
+            name: user.name,
+            nickname: user.nickname,
+            aboutMe: user.aboutMe,
+        }
+    }
 }

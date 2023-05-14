@@ -27,8 +27,8 @@ model User {
   events              Participant[]
   registrations       Registration[]
   notes               UserNotes[]            @relation(name: "author")
-  likes               GameLikes[]            @relation(name: "likeSender")
-  likedBy             GameLikes[]            @relation(name: "likeTarget")
+  likes               GameLike[]            @relation(name: "likeSender")
+  likedBy             GameLike[]            @relation(name: "likeTarget")
   gameResults         GameUserResultRecord[] @relation(name: "resultOwner")
   gameResultsAsTarget GameUserResultRecord[] @relation(name: "resultTarget")
 }
@@ -106,7 +106,7 @@ model Game {
   participants  Participant[]
   tables        Table[]
   rounds        Round[]
-  Likes         GameLikes[]
+  Likes         GameLike[]
   resultRecords GameUserResultRecord[]
 }
 
@@ -148,7 +148,7 @@ model UserNotes {
   notes        String
 }
 
-model GameLikes {
+model GameLike {
   id           Int  @id @default(autoincrement())
   gameId       Int
   game         Game @relation(fields: [gameId], references: [id])

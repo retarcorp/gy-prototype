@@ -42,6 +42,13 @@ export class GameService {
             }
         });
 
+        // Step 3.1. Put GameId to participants objects
+        await this.prismaClient.participant.updateMany({
+            where: { eventId },
+            data: { gameId: game.id },
+        });
+
+
         // Step 4. Calculate and put tables
         const participants = event.participants;
         const shuffledColors = colors.sort(() => Math.random() - 0.5);
@@ -132,6 +139,17 @@ export class GameService {
         }
         return game;
     }
+
+    async isUserParticipant(gameId: number, userId: number): Promise<boolean> {
+        const participant = await this.prismaClient.participant.findFirst({
+            where: {
+                gameId,
+                userId,
+            }
+        });
+        return !!participant;
+    }
+
     async getGameSetup(gameId: number): Promise<GameSetup> {
 
         const game = await this.getGameById(gameId);
@@ -204,4 +222,19 @@ export class GameService {
         return game;
     }
 
+    async getUserIdByParticipantId(participantId: number): Promise<number> {
+        const participant = await this.prismaClient.participant.findUnique({ where: { id: participantId } });
+        if (!participant) {
+            return null;
+        }
+        return participant.userId;
+    }
+
+    async getParticipantIdByUserId(userId: number, gameId: number): Promise<number> {
+        const participant = await this.prismaClient.participant.findFirst({ where: { userId: userId, gameId: gameId } });
+        if (!participant) {
+            return null;
+        }
+        return participant.id;
+    }
 }

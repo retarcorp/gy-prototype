@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post } from '@nestjs/common';
-import { AdminOnly, WithAuth } from '../User/Auth.guards';
+import { AdminOnly, CurrentUser, WithAuth } from '../User/Auth.guards';
 import { GameService } from './game.service';
 import { Game } from '@prisma/client';
 import { GameSetup, RoundSetup } from 'src/types/game';
@@ -72,6 +72,22 @@ export class GameController {
     }
 
     // User: game polling to see current round
+    @Get('/:id/round/current')
+    async getCurrentRound(@Param('id', ParseIntPipe) gameId: number, @CurrentUser('id') userId: number): Promise<RoundSetup> {
+        const isAllowed = await this.gameService.isUserParticipant(gameId, userId);
+        if(!isAllowed) {
+            throw new HttpException('User is not allowed to see this game', HttpStatus.FORBIDDEN);
+        }
+        
+        try {
+            const setup = await this.gameService.getCurrentRoundSetup(gameId);
+            return setup;
+
+        } catch (e) {
+            throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // User: toggle like
     // User: put note for entry
     // User: get list of entries/records
