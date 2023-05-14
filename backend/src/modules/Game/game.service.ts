@@ -218,11 +218,15 @@ export class GameService {
         }
         game.status = GameStatus.CLOSED;
         await this.prismaClient.game.update({ where: { id: gameId }, data: { status: GameStatus.CLOSED } });
+        await this.prismaClient.event.update({ where: { id: game.eventId }, data: { status: EventStatus.CLOSED } });
 
         return game;
     }
 
     async getUserIdByParticipantId(participantId: number): Promise<number> {
+        if (participantId === null) {
+            throw new Error('ParticipantId is null!');
+        }
         const participant = await this.prismaClient.participant.findUnique({ where: { id: participantId } });
         if (!participant) {
             return null;

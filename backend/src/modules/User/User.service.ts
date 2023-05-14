@@ -1,6 +1,7 @@
 import { HttpException, Injectable } from '@nestjs/common';
 import { PrismaClient, User, UserAuth, User as UserModel } from '@prisma/client';
 import AuthService from './Auth.service';
+import { PublicProfile } from 'src/types/game';
 
 @Injectable()
 export class UserService {
@@ -42,7 +43,7 @@ export class UserService {
 
     }
 
-    getPublicProfile(user: UserModel): Partial<UserModel> {
+    getPublicProfile(user: UserModel): PublicProfile {
         return {
             id: user.id,
             name: user.name,

@@ -1,9 +1,11 @@
-import { EventStatus, Game, GameStatus, PrismaClient } from "@prisma/client";
+import { EventStatus, Game, GameStatus, PrismaClient, Round, TableArrangement } from "@prisma/client";
 import { EventsService } from "../modules/Event/events.service";
 import { UserService } from "../modules/User/User.service";
 import AuthService from "../modules/User/Auth.service";
 import { GameService } from "../modules/Game/game.service";
 import GameResultService from "../modules/Game/gameResult.service";
+import exp from "constants";
+import { GameSetup } from "src/types/game";
 
 describe('Main app flow test', () => {
 
@@ -30,8 +32,10 @@ describe('Main app flow test', () => {
             events: []
         }
 
+        const N = 9;
+
         const testSuit = {
-            emails: new Array(5).fill(0).map((_, i) => `test-${i}-${Math.round(Math.random() * 10 ** 8)}@example.com`),
+            emails: new Array(N).fill(0).map((_, i) => `test-${i}-${Math.round(Math.random() * 10 ** 8)}@example.com`),
             eventData: {
                 title: 'Test Event ' + new Date().getTime(),
                 description: 'Test Description',
@@ -41,6 +45,12 @@ describe('Main app flow test', () => {
                 datetime: new Date(),
             }
         }
+
+        const Rn = N - 1 + (N % 2);
+        const actionsSetup = new Array(Rn).fill(0).map(() => ({
+            like: Math.random() > 0.5,
+            note: `Test note ${Math.round(Math.random() * 10 ** 9)}`
+        }))
 
         const getUsers = async () => await prismaClient.user.findMany({
             where: {
@@ -255,7 +265,7 @@ describe('Main app flow test', () => {
                 expect(roundSetup.index).toBe(i);
                 await gameService.moveGameToNextRound(game.id);
             }
-            
+
         })
 
         // Step X. User may put likes
@@ -271,7 +281,7 @@ describe('Main app flow test', () => {
 
                 const userTableArrangement = roundSetup.tableArrangements.find(ta => ta.participantAId === pId || ta.participantBId === pId);
                 const userPartnerPId = userTableArrangement.participantAId === pId ? userTableArrangement.participantBId : userTableArrangement.participantAId;
-                
+
                 if (userPartnerPId === null) {
                     return;
                 }
@@ -280,7 +290,7 @@ describe('Main app flow test', () => {
 
                 const likes = await gameResultService.getGameUserLikes(game.id, user.id);
                 expect(likes).toHaveLength(0);
-                
+
                 await gameResultService.toggleLike(game.id, user.id, partnerUid);
                 const likesAfter = await gameResultService.getGameUserLikes(game.id, user.id);
                 expect(likesAfter).toHaveLength(1);
@@ -310,16 +320,16 @@ describe('Main app flow test', () => {
             const rounds = await prismaClient.round.findMany({ where: { gameId: game.id } });
             const firstRound = rounds.find(r => r.index === 0);
             await prismaClient.game.update({ where: { id: game.id }, data: { currentRoundId: firstRound.id } });
-           
+
             const getNoteText = (uid, pid) => `Test note from ${uid} to user ${pid} replaced in a game ${game.id}`;
 
-            const runRound = async  () => {
+            const runRound = async () => {
                 const roundSetup = await gameService.getCurrentRoundSetup(game.id);
                 const pId = await gameService.getParticipantIdByUserId(user.id, game.id);
 
                 const userTableArrangement = roundSetup.tableArrangements.find(ta => ta.participantAId === pId || ta.participantBId === pId);
                 const userPartnerPId = userTableArrangement.participantAId === pId ? userTableArrangement.participantBId : userTableArrangement.participantAId;
-                
+
                 if (userPartnerPId === null) {
                     return;
                 }
@@ -337,6 +347,69 @@ describe('Main app flow test', () => {
 
             const notes = await gameResultService.getUserNotes(user.id);
             expect(notes.length).toBeGreaterThanOrEqual(gameSetup.rounds.length - 1);
+        })
+
+
+        // Step X. User may see total results and save notes and put likes
+        it('User can get valid preliminary results and change them', async () => {
+            const game = await setGameToStart();
+            const gameSetup: GameSetup = await gameService.getGameSetup(game.id);
+            const rounds: Round[] = gameSetup.rounds;
+            const user = await prismaClient.user.findFirst({ where: { email: testSuit.emails[0] } });
+            const pId = await gameService.getParticipantIdByUserId(user.id, game.id);
+
+            const runRound = async () => {
+                const roundSetup = await gameService.getCurrentRoundSetup(game.id);
+                const tableArrangement = roundSetup.tableArrangements.find(ta => ta.participantAId === pId || ta.participantBId === pId);
+                const partnerPId = tableArrangement.participantAId === pId ? tableArrangement.participantBId : tableArrangement.participantAId;
+                if (partnerPId !== null) {
+
+                    const partnerUid = await gameService.getUserIdByParticipantId(partnerPId);
+
+                    expect(partnerPId).not.toEqual(pId);
+                    expect(partnerUid).not.toEqual(user.id);
+                    const action = actionsSetup[roundSetup.index];
+                    if (!action) {
+                        console.log(roundSetup.index, actionsSetup, gameSetup.rounds);
+                    }
+                    if (action.like) {
+                        await gameResultService.toggleLike(game.id, user.id, partnerUid);
+                    }
+                    await gameResultService.setNote(user.id, partnerUid, action.note);
+                }
+
+                await gameService.moveGameToNextRound(game.id);
+            }
+
+            for (let i = 0; i < gameSetup.rounds.length; i++) {
+                await runRound();
+            }
+
+            const preliminaryResults = await gameResultService.getGameUserPreliminaryResults(game.id, user.id);
+            const likesCount = actionsSetup.reduce((count, { like }) => count + Number(like), 0)
+
+            expect(preliminaryResults.likes.length).toBeGreaterThanOrEqual(likesCount - 1);
+            expect(preliminaryResults.notes.length).toBeGreaterThanOrEqual(actionsSetup.length - 1);
+
+            actionsSetup.forEach(({ like, note }, i) => {
+                const tableArrangements = gameSetup.tableArrangements.filter(ta => ta.roundId === rounds[i].id);
+                const targetArrangement: TableArrangement = tableArrangements.find(ta => ta.participantAId === pId || ta.participantBId === pId);
+                const partnerPId: number | null = targetArrangement.participantAId === pId ? targetArrangement.participantBId : targetArrangement.participantAId;
+                const targetUId = gameSetup.participants.find(p => p.id === partnerPId)?.userId || null;
+
+                if (targetUId !== null) {
+                    if (like) {
+                        const likeToCheck = preliminaryResults.likes.find(l => (l.userId === user.id && l.targetUserId === targetUId));
+                        expect(likeToCheck.targetUserId).toBe(targetUId);
+                        expect(likeToCheck.userId).toBe(user.id)
+                        expect(likeToCheck.gameId).toBe(game.id)
+                    }
+
+                    const noteToCheck = preliminaryResults.notes.find(n => n.targetUserId === targetUId);
+                    expect(noteToCheck.userId).toBe(user.id);
+                    expect(noteToCheck.notes).toBe(note);
+                }
+            })
         })
 
         // Step X. Finalize game
@@ -357,9 +430,27 @@ describe('Main app flow test', () => {
             expect(event.status).toBe(EventStatus.FINAL);
         })
 
-        // Step X. User may see total results and save notes and put likes
-
         // Step X. Close game
+        it('Game can be closed', async () => {
+            const game = await getGame();
+            await gameService.closeGame(game.id);
+            const closedGame = await getGame();
+
+            expect(closedGame.status).toBe(GameStatus.CLOSED);
+            const event = await getEvent();
+
+            expect(event.status).toBe(EventStatus.CLOSED);
+
+            const user1 = await prismaClient.user.findFirst({ where: { email: testSuit.emails[0] } });
+            const user2 = await prismaClient.user.findFirst({ where: { email: testSuit.emails[1] } });
+
+            const putLike = async () => {
+                await gameResultService.toggleLike(game.id, user1.id, user2.id);
+            }
+
+            expect(putLike).rejects.toThrow();
+
+        })
 
         // Step X. User may see the results of a game - likes, contacts, notes
 
@@ -367,15 +458,16 @@ describe('Main app flow test', () => {
 
         // Step X. User may see list of past events and see their results
 
+        // Cleaning the DB after all tests
         afterAll(async () => {
 
             const { emails, eventData } = testSuit;
 
             const event = await getEvent();
             const game = await getGame();
-            const users = await prismaClient.user.findMany({ where: { email: { in: emails } }})
+            const users = await prismaClient.user.findMany({ where: { email: { in: emails } } })
 
-            await prismaClient.userNotes.deleteMany({ where: { userId: { in: users.map(u => u.id) } }})
+            await prismaClient.userNotes.deleteMany({ where: { userId: { in: users.map(u => u.id) } } })
             await prismaClient.gameLike.deleteMany({ where: { gameId: game.id } });
 
             const tables = await prismaClient.table.findMany({ where: { gameId: game.id } });
@@ -383,7 +475,6 @@ describe('Main app flow test', () => {
             await prismaClient.table.deleteMany({ where: { gameId: game.id } });
             await prismaClient.round.deleteMany({ where: { gameId: game.id } });
             await prismaClient.game.deleteMany({ where: { id: game.id } })
-
 
             await prismaClient.participant.deleteMany({ where: { eventId: event.id } })
             await prismaClient.registration.deleteMany({ where: { eventId: event.id } })
@@ -393,7 +484,6 @@ describe('Main app flow test', () => {
                 const user = await prismaClient.user.findUnique({ where: { email } });
                 await prismaClient.userAuth.deleteMany({ where: { userId: user.id } })
                 await prismaClient.user.deleteMany({ where: { id: user.id } })
-                await prismaClient.$disconnect();
             }
 
             await Promise.all(emails.map(deleteUser));
