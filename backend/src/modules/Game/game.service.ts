@@ -3,11 +3,15 @@ import { EventStatus, Game, GameStatus, Participant, PrismaClient, Round } from 
 import colors from '../../config/colors';
 import calculatePositions, { CalculatedRound, TableRound } from '../../utils/calculation';
 import { GameSetup, RoundSetup } from 'src/types/game';
+import GameResultService from './gameResult.service';
+import GameUtilsService from './gameUtils.service';
 
 @Injectable()
 export class GameService {
     constructor(
         private readonly prismaClient: PrismaClient,
+        private readonly gameResultService: GameResultService,
+        private readonly gameUtilsService: GameUtilsService
     ) {}
 
 
@@ -128,31 +132,9 @@ export class GameService {
         return startedGame;
     }
 
-    async getGameByEventId(eventId: number): Promise<Game> {
-        return await this.prismaClient.game.findUnique({ where: { eventId: eventId }, });
-    }
-
-    async getGameById(gameId: number): Promise<Game> {
-        const game = await this.prismaClient.game.findUnique({ where: { id: gameId }, });
-        if (!game) {
-            throw new Error('Game not found!');
-        }
-        return game;
-    }
-
-    async isUserParticipant(gameId: number, userId: number): Promise<boolean> {
-        const participant = await this.prismaClient.participant.findFirst({
-            where: {
-                gameId,
-                userId,
-            }
-        });
-        return !!participant;
-    }
-
     async getGameSetup(gameId: number): Promise<GameSetup> {
 
-        const game = await this.getGameById(gameId);
+        const game = await this.gameUtilsService.getGameById(gameId);
         const participants = await this.prismaClient.participant.findMany({
             where: { eventId: game.eventId },
             include: { user: true }
@@ -178,7 +160,7 @@ export class GameService {
 
         const round = await this.prismaClient.round.findUnique({
             where: {
-                id: (await this.getGameById(gameId)).currentRoundId,
+                id: (await this.gameUtilsService.getGameById(gameId)).currentRoundId,
             },
             include: {
                 tableArrangements: true
@@ -193,7 +175,7 @@ export class GameService {
     }
 
     async moveGameToNextRound(gameId: number): Promise<Game> {
-        const game: Game = await this.getGameById(gameId);
+        const game: Game = await this.gameUtilsService.getGameById(gameId);
         const rounds: Round[] = await this.prismaClient.round.findMany({ where: { gameId: gameId } });
         const currentRoundIndex = rounds.find((r) => r.id === game.currentRoundId).index;
 
@@ -212,13 +194,15 @@ export class GameService {
     }
 
     async closeGame(gameId: number): Promise<Game> {
-        const game: Game = await this.getGameById(gameId);
+        const game: Game = await this.gameUtilsService.getGameById(gameId);
         if (game.status !== GameStatus.FINAL) {
             throw new Error('Game is not in final status!');
         }
         game.status = GameStatus.CLOSED;
         await this.prismaClient.game.update({ where: { id: gameId }, data: { status: GameStatus.CLOSED } });
         await this.prismaClient.event.update({ where: { id: game.eventId }, data: { status: EventStatus.CLOSED } });
+
+        await this.gameResultService.calculateGameResults(gameId);
 
         return game;
     }

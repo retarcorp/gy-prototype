@@ -1,11 +1,11 @@
-import { EventStatus, Game, GameStatus, PrismaClient, Round, TableArrangement } from "@prisma/client";
+import { EventStatus, Game, GameLike, GameStatus, PrismaClient, ResutlType, Round, TableArrangement, User } from "@prisma/client";
 import { EventsService } from "../modules/Event/events.service";
 import { UserService } from "../modules/User/User.service";
 import AuthService from "../modules/User/Auth.service";
 import { GameService } from "../modules/Game/game.service";
 import GameResultService from "../modules/Game/gameResult.service";
-import exp from "constants";
-import { GameSetup } from "src/types/game";
+import { GameSetup } from "../types/game";
+import GameUtilsService from "../modules/Game/gameUtils.service";
 
 describe('Main app flow test', () => {
 
@@ -14,6 +14,7 @@ describe('Main app flow test', () => {
     let userService: UserService;
     let authService: AuthService;
     let gameService: GameService;
+    let gameUtilsService: GameUtilsService;
     let gameResultService: GameResultService;
 
     beforeAll(() => {
@@ -21,8 +22,9 @@ describe('Main app flow test', () => {
         eventService = new EventsService(prismaClient);
         authService = new AuthService(prismaClient);
         userService = new UserService(prismaClient, authService);
-        gameService = new GameService(prismaClient);
-        gameResultService = new GameResultService(prismaClient, userService, gameService);
+        gameUtilsService = new GameUtilsService(prismaClient);
+        gameResultService = new GameResultService(prismaClient, userService, gameUtilsService);
+        gameService = new GameService(prismaClient, gameResultService, gameUtilsService);
 
     })
 
@@ -310,7 +312,6 @@ describe('Main app flow test', () => {
 
         })
 
-
         // Step X. User may save notes
         it('User can save notes for a user', async () => {
             const user = await prismaClient.user.findFirst({ where: { email: testSuit.emails[0] } });
@@ -412,6 +413,39 @@ describe('Main app flow test', () => {
             })
         })
 
+        const likesTable = new Array(testSuit.emails.length)
+            .fill(0)
+            .map(() => new Array(testSuit.emails.length)
+                .fill(0)
+                .map(() => Math.random() > 0.5)
+            )
+            
+        // Step X. Setting up likes table for checking matches afterwards
+        it('Setting up likes generates correct DB records and allows to calculate results later', async () => {
+            const users = await prismaClient.user.findMany({ where: { email: { in: testSuit.emails } } });
+            const game = await setGameToStart();
+
+            const dbLikes = await prismaClient.gameLike.findMany({ where: { gameId: game.id } });
+
+            const promises = likesTable.map((row, i) => {
+                const userId = users[i].id;
+                return Promise.all(row.map(async (like, j) => {
+                    const targetUserId = users[j].id;
+                    if (like) {
+                        await gameResultService.toggleLike(game.id, userId, targetUserId)
+                    }
+                }))
+            })
+            await Promise.all(promises);
+
+            const toggledLikesCount = likesTable.flatMap(row => row.filter(Boolean)).length;
+            const dbLikesAfter = await prismaClient.gameLike.findMany({ where: { gameId: game.id } });
+
+            expect(dbLikesAfter.length).toBeLessThanOrEqual(toggledLikesCount + dbLikes.length);
+            expect(dbLikesAfter.length).toBeGreaterThanOrEqual(dbLikes.length - toggledLikesCount);
+        })
+
+
         // Step X. Finalize game
         it('Game can be finalized', async () => {
             const mainGame = await getGame();
@@ -453,10 +487,56 @@ describe('Main app flow test', () => {
         })
 
         // Step X. User may see the results of a game - likes, contacts, notes
+        // -- Before closing and finalizing game, add some likes to make test results
+        it('User can view game results with likes, matches and corresponding contacts', async () => {
+            const user = await prismaClient.user.findFirst({ where: { email: testSuit.emails[0] }})
+            const game = await getGame();
+            const event = await getEvent();
 
-        // Step X. User may see that event was added to his list of attended
+            const results = await gameResultService.getUserGameResults(user.id, game.id);
+            const onewayResults = results.filter(r => r.type === ResutlType.LIKEDBY);
+            const matches = results.filter(r => r.type === ResutlType.MATCH);
+
+            const likesAsTarget: GameLike[] = await prismaClient.gameLike.findMany({ where: { targetUserId: user.id } });
+            const likesAsAuthor: GameLike[] = await prismaClient.gameLike.findMany({ where: { userId: user.id } });
+            const expectedResultsCount = likesAsTarget.length;
+            const expectedMatchesCount = likesAsAuthor.filter(laa => likesAsTarget.some(lat => lat.userId === laa.targetUserId)).length;
+
+            expect(results.length).toBeGreaterThanOrEqual(expectedResultsCount);
+            expect(onewayResults.length).toBe(expectedResultsCount - expectedMatchesCount);
+            expect(matches.length).toBe(expectedMatchesCount);
+
+        })
+
+
+        // Step X. User may see that event was added to his list of attended after event was finished
+        it('User can see event in his list of attended events', async () => { 
+            const user: User = await prismaClient.user.findFirst({ where: { email: testSuit.emails[0] }})
+            const events = await eventService.getUserFinishedEvents(user.id);
+            const event = await getEvent();
+
+            expect(events.every(e => e.status === EventStatus.CLOSED));
+            expect(events.some(e => e.id === event.id)).toBe(true);
+
+        })
 
         // Step X. User may see list of past events and see their results
+        it('User can see previous events and results of them', async () => {
+            const user: User = await prismaClient.user.findFirst({ where: { email: testSuit.emails[0] }})
+            const attendedEvents = await eventService.getUserFinishedEvents(user.id);
+
+            await Promise.all(attendedEvents.map(async (event) => {
+                const game = await gameUtilsService.getGameByEventId(event.id);
+                const results = await gameResultService.getUserGameResults(user.id, game.id);
+                const onewayResults = results.filter(r => r.type === ResutlType.LIKEDBY);
+                const matches = results.filter(r => r.type === ResutlType.MATCH);
+                expect(results.length).toBeGreaterThanOrEqual(onewayResults.length);
+                expect(results.length).toBeGreaterThanOrEqual(matches.length);
+            }))
+        })
+
+
+
 
         // Cleaning the DB after all tests
         afterAll(async () => {
@@ -465,6 +545,8 @@ describe('Main app flow test', () => {
 
             const event = await getEvent();
             const game = await getGame();
+
+            const results = await prismaClient.gameUserResultRecord.deleteMany( { where: { gameId: game.id }});
             const users = await prismaClient.user.findMany({ where: { email: { in: emails } } })
 
             await prismaClient.userNotes.deleteMany({ where: { userId: { in: users.map(u => u.id) } } })

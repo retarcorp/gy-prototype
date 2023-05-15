@@ -149,7 +149,20 @@ export class EventsService {
         });
 
         return events;
+    }
 
+    async getUserFinishedEvents(userId: number) {
+        const participations: Participant[] = await this.prismaClient.participant.findMany({ where: { userId: userId } });
+
+        return this.prismaClient.event.findMany({
+            where: { 
+                status: EventStatus.CLOSED,
+                id: {
+                    in: participations.map(participation => participation.eventId),
+                }
+             },
+            
+        })
     }
 
     async getUserRegisterations(userId: number): Promise<Array<Registration & { event: Event }>> {
