@@ -23,7 +23,7 @@ export class UserController {
   }
 
   @Post('/users/signin')
-  async signIn(@Body('email') email: string, @Body('password') password: string): Promise<any> {
+  async signIn(@Body('email') email: string, @Body('password') password: string): Promise<UserModel | any> {
     try {
       return this.userService.signIn(email, password);
     } catch (error) {
@@ -48,7 +48,7 @@ export class UserController {
   @Get('/users/validate')
   @WithAuth()
   async validateAuth(@CurrentUser() user: User): Promise<any> {
-    return { valid: true, user };
+    return { valid: !!user, user };
   }
 
   @Get('/admin/validate')

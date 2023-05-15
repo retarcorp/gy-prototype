@@ -7,10 +7,11 @@ import { PrismaClient } from '@prisma/client';
 import AuthService from '../User/Auth.service';
 import GameResultService from './gameResult.service';
 import GameUtilsService from './gameUtils.service';
+import { UserService } from '../User/User.service';
 
 @Module({
   imports: [EventsModule, UserModule],
   controllers: [GameController],
-  providers: [GameService, PrismaClient, AuthService, GameResultService, GameUtilsService]
+  providers: [GameService, PrismaClient, AuthService, GameResultService, GameUtilsService, UserService]
 })
 export class GameModule {}

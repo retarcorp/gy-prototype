@@ -3,13 +3,15 @@ import { AdminOnly, CurrentUser, WithAuth } from '../User/Auth.guards';
 import { GameService } from './game.service';
 import { Game } from '@prisma/client';
 import { GameSetup, RoundSetup } from 'src/types/game';
+import GameUtilsService from './gameUtils.service';
 
 @Controller('games')
 @WithAuth()
 export class GameController {
 
     constructor(
-        private readonly gameService: GameService
+        private readonly gameService: GameService,
+        private readonly gameUtilsService: GameUtilsService
     ) { }
 
     @Post('/testSet')
@@ -74,7 +76,7 @@ export class GameController {
     // User: game polling to see current round
     @Get('/:id/round/current')
     async getCurrentRound(@Param('id', ParseIntPipe) gameId: number, @CurrentUser('id') userId: number): Promise<RoundSetup> {
-        const isAllowed = await this.gameService.isUserParticipant(gameId, userId);
+        const isAllowed = await this.gameUtilsService.isUserParticipant(gameId, userId);
         if(!isAllowed) {
             throw new HttpException('User is not allowed to see this game', HttpStatus.FORBIDDEN);
         }

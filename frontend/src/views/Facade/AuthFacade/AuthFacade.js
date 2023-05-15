@@ -3,10 +3,10 @@ import { useEffect, useState } from "react";
 import FacebookSignIn from "./FacebookSignIn";
 import SignIn from "./SignIn";
 import SignUp from "./SignUp";
-import { createUser, signIn } from "../../../services/auth";
 import useErrorAlert from "./useErrorAlert";
 import AuthStub from "./AuthStub";
-
+import { useDispatch, useSelector } from "react-redux";
+import { setInternalError, signIn, signUp } from "../../../store/user";
 export const MODES = {
     signIn: 'signIn',
     signUp: 'signUp',
@@ -14,17 +14,26 @@ export const MODES = {
     authorized: 'authorized'
 }
 
-
-export default function AuthFacade({ mode = 'signIn', onAuthorized = () => {} }) {
+export default function AuthFacade({ mode = 'signIn', onAuthorized = () => { } }) {
 
     const [errorComponent, displayError] = useErrorAlert();
 
-    const [internalMode, setInternalMode] = useState('signIn');
-    useEffect(() => {
-        setInternalMode(mode);
-    }, [mode])
+    const isLoading = useSelector(state => state.user.isLoading);
+    const internalError = useSelector(state => state.user.internalError);
+    const currentUser = useSelector(state => state.user.user);
+    const dispatch = useDispatch();
 
-    const [isRequesting, setIsRequesting] = useState(false);
+    const [internalMode, setInternalMode] = useState('signIn');
+
+    useEffect(() => {
+        if (internalError) {
+            displayError(internalError);
+            dispatch(setInternalError(null));
+        }
+    }, [internalError, dispatch, displayError]);
+
+    useEffect(() => { setInternalMode(mode); }, [mode])
+
 
     const switchers = {
         onSignIn: () => setInternalMode(MODES.signIn),
@@ -32,42 +41,23 @@ export default function AuthFacade({ mode = 'signIn', onAuthorized = () => {} })
         onFacebookSignIn: () => setInternalMode(MODES.facebookSignIn)
     }
 
-
     const onSignIn = (args) => {
-        setIsRequesting(true)
-        signIn(args.email, args.password)
-            .then((res) => {
-                setInternalMode('authorized');
-                onAuthorized(res);
-            })
-            .catch((error) => {
-                displayError(error.message)
-            })
-            .finally(() => setIsRequesting(false))
-    };
+        dispatch(signIn(args.email, args.password));
+    }
 
     const onSignUp = (args) => {
         if (args.password !== args.repeatPassword) {
             return displayError('Passwords must be the same!')
         }
-
-        setIsRequesting(true)
-        createUser(args.email, args.password)
-            .then((res) => {
-                setInternalMode('authorized')
-                onAuthorized(res);
-            })
-            .catch((error) => {
-                displayError(error.message)
-            })
-            .finally(() => setIsRequesting(false)) ;
+        dispatch(signUp(args.email, args.password));
     };
 
     return <>
+        {currentUser ? <div>Authorized</div> : null}
         {internalMode === 'signIn' ? <SignIn {...switchers} onSignIn={onSignIn} /> : null}
         {internalMode === 'signUp' ? <SignUp {...switchers} onSignUp={onSignUp} /> : null}
         {internalMode === 'facebookSignIn' ? <FacebookSignIn {...switchers} /> : null}
-        {isRequesting ? <AuthStub />: null}
+        {isLoading ? <AuthStub /> : null}
         {errorComponent()}
     </>;
 }

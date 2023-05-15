@@ -26,7 +26,7 @@ export default class AuthService {
         return { user, auth }
     }
 
-    async signIn(email: string, password: string): Promise<UserAuth | null> {
+    async signIn(email: string, password: string): Promise<{user: User, auth: UserAuth} | null> {
         const user: User = await this.prismaClient.user.findUnique({
             where: {
                 email,
@@ -58,7 +58,7 @@ export default class AuthService {
             },
         });
 
-        return updatedAuth;
+        return {user, auth: updatedAuth};
 
     }
 

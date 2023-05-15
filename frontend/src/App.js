@@ -9,6 +9,8 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import { Provider } from 'react-redux'
+import store from './store';
 
 const router = createBrowserRouter([
   {
@@ -26,13 +28,13 @@ const router = createBrowserRouter([
   {
     path: "/admin/events",
     element: withAdminWrapper(AdminEventsBlockPage)()
-  },{
+  }, {
     path: "/admin/events/:id/edit",
-    element: withAdminWrapper(AdminManageEventPage)()  
-  },{
+    element: withAdminWrapper(AdminManageEventPage)()
+  }, {
     path: "/admin/events/create",
     element: withAdminWrapper(AdminManageEventPage)()
-  },{
+  }, {
     path: "/admin/events/:id",
     element: withAdminWrapper(() => <div>Event Dashboard - TBD</div>)()
   }
@@ -41,7 +43,9 @@ const router = createBrowserRouter([
 function App() {
 
   return (
-    <RouterProvider router={router}></RouterProvider>
+    <Provider store={store}>
+      <RouterProvider router={router}></RouterProvider>
+    </Provider>
 
   );
 }

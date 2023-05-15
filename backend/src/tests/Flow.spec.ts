@@ -546,7 +546,7 @@ describe('Main app flow test', () => {
             const event = await getEvent();
             const game = await getGame();
 
-            const results = await prismaClient.gameUserResultRecord.deleteMany( { where: { gameId: game.id }});
+            await prismaClient.gameUserResultRecord.deleteMany( { where: { gameId: game.id }});
             const users = await prismaClient.user.findMany({ where: { email: { in: emails } } })
 
             await prismaClient.userNotes.deleteMany({ where: { userId: { in: users.map(u => u.id) } } })
