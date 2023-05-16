@@ -166,7 +166,6 @@ export class EventsService {
     }
 
     async getUserRegistrations(userId: number): Promise<Array<Registration & { event: Event }>> {
-        console.log(userId);
         return (await this.prismaClient.registration.findMany({
             where: {
                 userId: userId,

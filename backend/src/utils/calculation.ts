@@ -18,8 +18,6 @@ export function validateRounds(Tn, Rn, N, rounds) {
         throw new Error('Round count is not equal ' + Rn);
     }
     if (rounds.some(r => r.length !== Tn)) {
-        console.log(rounds, rounds.map(r => r.length));
-        console.log(Tn)
         throw new Error('Some rounds have incorrect amount of tables!')
     }
     const flattened = rounds.flat(1).map(String);

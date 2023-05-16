@@ -7,10 +7,8 @@ import withAdminWrapper from "./views/AdminArea/AdminWrapper";
 import AdminEventsBlockPage from './views/AdminArea/AdminEvents/AdminEventsBlockPage';
 import AdminManageEventPage from './views/AdminArea/AdminEvents/AdminManageEventPage';
 import UserEventsPage from "./views/UserArea/Events/UserEventsPage";
-import UserOnboardingPageStories from "./stories/UserOnboardingPage.stories";
 import OnboardingPage from "./views/UserArea/Onboarding/OnboardingPage";
-import withUserAuthWrapper, { TestComponent } from "./views/UserArea/withUserAuthWrapper";
-import withUserWrapper from "./views/UserArea/withUserWrapper";
+import EventPage from "./views/UserArea/EventProcess/EventPage";
 
 const router = createBrowserRouter([
   {
@@ -44,8 +42,8 @@ const router = createBrowserRouter([
     path: '/user/events/',
     element: <UserEventsPage />
   }, {
-    path: '/user/test/',
-    element: <TestComponent />,
+    path: '/user/events/:id',
+    element: <EventPage />,
   }
 ]);
 

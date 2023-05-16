@@ -6,13 +6,18 @@ const userEventsSlice = createSlice({
     initialState: {
         availableEvents: [],
         upcomingEvents: [],
-        participatedEvents: []
+        participatedEvents: [],
+        registrations: [],
     },
     reducers: {
         setAvailableEvents(state, { payload }) {
             state.availableEvents = payload || [];
         },
         setUpcomingEvents(state, { payload }) {
+            state.upcomingEvents = (payload || []).map(e => e.event)
+        },
+        setRegistrations(state, { payload }){
+            state.registrations = (payload || []);
             state.upcomingEvents = (payload || []).map(e => e.event)
         },
         setParticipatedEvents(state, { payload }) {
@@ -48,6 +53,10 @@ export const loadUserEvents = () => (dispatch: Function) => {
 
 export const loadUpcomingEvents = () => (dispatch: Function) => {
     return getEvents('http://localhost:8000/events/registered', userEventsSlice.actions.setUpcomingEvents)(dispatch);
+}
+
+export const loadRegistrations = () => (dispatch: Function) => {
+    return getEvents('http://localhost:8000/events/registered', userEventsSlice.actions.setRegistrations)(dispatch);
 }
 
 export const getParticipatedEvents = () => (dispatch: Function) => {

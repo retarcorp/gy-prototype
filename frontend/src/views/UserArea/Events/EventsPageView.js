@@ -10,7 +10,6 @@ export default function EventsPageView({ available, upcoming, past, onRegister, 
     const [upcomingEvents, setUpcomingEvents] = useState([]);
     const [pastEvents, setPastEvents] = useState([]);
 
-    const grid = (element) => <Grid item xs={12} xl={3} lg={4} md={6}>{element} </Grid>;
 
     const onClickRegister = (e) => {
         // TODO register on event
@@ -19,8 +18,7 @@ export default function EventsPageView({ available, upcoming, past, onRegister, 
     }
 
     const onStart = (e) => {
-        // TODO start event
-        console.log('Starting event', e);
+        window.location.href = `/user/events/${e.id}`;
     }
 
     const onOpen = (e) => {
@@ -28,10 +26,10 @@ export default function EventsPageView({ available, upcoming, past, onRegister, 
         console.log('Open event page', e);
     }
 
-    
-    const AvailableEvents = () => available.map(e => <ListEventCard key={e.id} event={e} onRegister={() => onClickRegister(e)} />).map(grid);
-    const MyUpcomingEvents = () => upcoming.map(e => <UpcomingEventCard key={e.id} event={e} onStart={() => onStart(e)} onCancel={() => onCancel(e)} />).map(grid);
-    const AttendedByMeEvents = () => past.map(e => <AttendedEventCard key={e.id} event={e} onOpen={() => onOpen(e)} />).map(grid);
+    const grid = (element, key) => <Grid key={key} item xs={12} xl={3} lg={4} md={6}>{element} </Grid>;
+    const AvailableEvents = () => available.map(e => grid(<ListEventCard event={e} onRegister={() => onClickRegister(e)} />, e.id))
+    const MyUpcomingEvents = () => upcoming.map(e => grid(<UpcomingEventCard event={e} onStart={() => onStart(e)} onCancel={() => onCancel(e)} />, e.id));
+    const AttendedByMeEvents = () => past.map(e => grid(<AttendedEventCard event={e} onOpen={() => onOpen(e)} />, e.id));
 
     return <Box>
         <Tabs onChange={(e, v) => setTab(v)} value={tab}>

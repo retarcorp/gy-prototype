@@ -17,7 +17,6 @@ export default class GameResultService {
         const isValidParticipants = (await this.gameUtilsService.isUserParticipant(gameId, userId))
             && (await this.gameUtilsService.isUserParticipant(gameId, targetUserId));
         if (!isValidParticipants) {
-            console.log(gameId, userId, targetUserId)
             throw new Error('Invalid participants');
         }
 

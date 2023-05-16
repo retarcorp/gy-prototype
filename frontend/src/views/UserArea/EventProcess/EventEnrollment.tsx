@@ -3,16 +3,19 @@ import React, { useEffect, useState } from "react";
 import QRCode from "react-qr-code";
 
 type EventEnrollmentProps = {
-
+    event: Event;
+    [key: string]: any;
 }
 
-const getCode = () => Math.round(Math.random() * 8999 + 1000).toString();
+
 
 export default function EventEnrollment(props: EventEnrollmentProps) {
 
+    console.log(props);
+
     const [code, setCode] = useState('');
     useEffect(() => {
-        setCode(getCode());
+        setCode(props.enrollmentPIN);
     }, [])
 
     const grCodeValue = () => {
@@ -43,7 +46,7 @@ export default function EventEnrollment(props: EventEnrollmentProps) {
 
             <Grid item justifySelf={'flex-end'}>
 
-                <Button variant={'text'} color={'secondary'} href="/events">Back to event list</Button>
+                <Button variant={'text'} color={'secondary'} href="/user/events/">Back to event list</Button>
             </Grid>
         </Grid>
     );
