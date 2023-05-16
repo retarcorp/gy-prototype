@@ -9,6 +9,7 @@ import AdminManageEventPage from './views/AdminArea/AdminEvents/AdminManageEvent
 import UserEventsPage from "./views/UserArea/Events/UserEventsPage";
 import OnboardingPage from "./views/UserArea/Onboarding/OnboardingPage";
 import EventPage from "./views/UserArea/EventProcess/EventPage";
+import { CreateEventPage, UpdateEventPage } from "./views/AdminArea/AdminEvents/UpsertEventPage";
 
 const router = createBrowserRouter([
   {
@@ -25,13 +26,13 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/events",
-    element: (() => withAdminWrapper(AdminEventsBlockPage)()) as unknown as ReactNode
+    element: <AdminEventsBlockPage />,
   }, {
-    path: "/admin/events/:id/edit",
-    element: (() => withAdminWrapper(AdminManageEventPage)()) as unknown as ReactNode
+    path: "/admin/events/edit/:id",
+    element: <UpdateEventPage />
   }, {
     path: "/admin/events/create",
-    element: (() => withAdminWrapper(AdminManageEventPage)()) as unknown as ReactNode
+    element: <CreateEventPage />
   }, {
     path: "/admin/events/:id",
     element: (() => withAdminWrapper(() => <div>Event Dashboard - TBD</div>)()) as unknown as ReactNode

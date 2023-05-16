@@ -39,9 +39,10 @@ export class EventsService {
 
         const eventEdit: Partial<Event> =
             allowedFields.reduce((prev: Partial<Event>, key: string) => key in eventData ? { [key]: eventData[key], ...prev } : prev, {});
+        eventEdit.participantLimit = parseInt(eventEdit.participantLimit as any);
 
-
-        if (!([EventStatus.DRAFT, EventStatus.UPCOMING] as EventStatus[]).includes(event.status)) {
+        const canUpdate = ([EventStatus.DRAFT, EventStatus.UPCOMING] as EventStatus[]).includes(event.status)
+        if (!canUpdate) {
             throw new HttpException('Cannot update event that is not in draft or upcoming status', HttpStatus.FORBIDDEN);
         }
 
@@ -53,6 +54,7 @@ export class EventsService {
         })
     }
 
+
     async deleteEvent(eventId: number): Promise<Event> {
         const event = await this.prismaClient.event.findUnique({
             where: {
@@ -61,8 +63,12 @@ export class EventsService {
         });
 
         if (!event) {
-            throw new HttpException('Event not found!', HttpStatus.NOT_FOUND);
+            throw new HttpException('Event #' + eventId + ' not found!', HttpStatus.NOT_FOUND);
         }
+
+        await this.prismaClient.registration.deleteMany({
+            where: { eventId: eventId }
+        });
 
         return await this.prismaClient.event.delete({
             where: {
@@ -155,13 +161,13 @@ export class EventsService {
         const participations: Participant[] = await this.prismaClient.participant.findMany({ where: { userId: userId } });
 
         return this.prismaClient.event.findMany({
-            where: { 
+            where: {
                 status: EventStatus.CLOSED,
                 id: {
                     in: participations.map(participation => participation.eventId),
                 }
-             },
-            
+            },
+
         })
     }
 

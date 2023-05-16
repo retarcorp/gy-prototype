@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EventCard from "../../../components/EventCard";    
 
-export default function AdminEventCard({ event, preview = false }: { event: Event; preview: boolean }) {
+export default function AdminEventCard({ event, preview = false, ...props }: any & { event: Event; preview: boolean }) {
 
     return <EventCard event={event}>
 
@@ -16,14 +16,14 @@ export default function AdminEventCard({ event, preview = false }: { event: Even
                     </Button>
 
                     <Grid item>
-                        <Link href={`/admin/events/${event.id}/edit`}>
+                        <Link href={`/admin/events/edit/${event.id}`}>
                             <IconButton>
-                                <EditIcon />
+                                <EditIcon/>
                             </IconButton>
                         </Link>
 
-                        <IconButton>
-                            <DeleteIcon />
+                        <IconButton onClick={() => props.onDelete(event)}>
+                            <DeleteIcon/>
                         </IconButton>
                     </Grid>
                 </Grid>

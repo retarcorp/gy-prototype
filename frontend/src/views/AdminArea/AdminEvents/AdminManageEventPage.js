@@ -1,9 +1,9 @@
 import { Box, Button, Checkbox, Divider, FormControlLabel, FormGroup, Grid, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AdminEventCard from "./AdminEventCard.tsx";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-export default function AdminManageEventPage() {
+export default function AdminManageEventPage(props) {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -14,7 +14,33 @@ export default function AdminManageEventPage() {
     const [participantLimit, setParticipantLimit] = useState(0);
     const [isDraft, setIsDraft] = useState(false);
 
+    useEffect(() => {
+        if(props.event) {
+            console.log(props.event);
+            setTitle(props.event.title);
+            setDescription(props.event.description);
+            setDate(props.event.dateTime.toISOString().split('T')[0].toString());
+            setTime(props.event.dateTime.toISOString().split('T')[1].toString().split('.')[0]);
+            setPrice(props.event.price);
+            setLocation(props.event.location);
+            setParticipantLimit(props.event.participantLimit);
+            setIsDraft(props.event.isDraft); 
+        }
+    }, [props.event])
+
     const h = (v, setV) => ({ value: v, onChange: (e) => setV(e.target.value) })
+
+    const save = () => {
+        props.onSave({
+            title,
+            description,
+            datetime: new Date(`${date} ${time}`).toISOString(),
+            price,
+            location,
+            participantLimit,
+            isDraft
+        })
+    }
 
     return <Box sx={{maxWidth: '900px', margin: '0 auto'}}>
         <Box>
@@ -87,8 +113,8 @@ export default function AdminManageEventPage() {
                 </Grid>
 
                 <Grid item xs={12} container justifyContent={'space-between'}>
-                    <Button variant="contained" color="primary">Save</Button>
-                    <Button variant="text" color="error">Cancel</Button>
+                    <Button variant="contained" color="primary" onClick={save}>Save</Button>
+                    <Button variant="text" color="error" onClick={props.onCancel}>Cancel</Button>
                 </Grid>
 
             </Grid>

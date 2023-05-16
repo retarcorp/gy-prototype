@@ -1,6 +1,9 @@
 import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material"
 import MenuIcon from '@mui/icons-material/Menu';
 import useLogOut from "../../hooks/useLogOut";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { validateToken } from "../../store/user";
 
 export default function withAdminWrapper(Component) {
     return function AdminWrapper(props) {
@@ -32,6 +35,36 @@ export default function withAdminWrapper(Component) {
                 </Box>
             </Box>
 
+        </>
+    }
+}
+
+export function withAdminAuthWrapper(Component) {
+    return function AdminAuthWrapper(props) {
+        const token = useSelector(state => state.user.token);
+        const currentUser = useSelector(state => state.user.user);
+        const isLoading = useSelector(state => state.user.isLoading);
+        const isTokenChecked = useSelector(state => state.user.isTokenChecked);
+
+        const dispatch = useDispatch();
+
+        useEffect(() => {
+            dispatch(validateToken());
+        }, [dispatch])
+
+        if (isTokenChecked) {
+            if (!currentUser) {
+                window.location.href = '/';
+                return <></>
+            }
+            if(!currentUser.isAdmin) {
+                window.location.href = '/';
+                return <></>
+            }
+        }
+
+        return <>
+            <Component {...props} />
         </>
     }
 }

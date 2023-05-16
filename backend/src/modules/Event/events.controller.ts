@@ -19,7 +19,7 @@ export class EventsController {
     @Get('/editable')
     @AdminOnly()
     async getEditableEvents(): Promise<any> {
-        const events = await this.eventsService.getEvents([EventStatus.UPCOMING, EventStatus.DRAFT]);
+        return await this.eventsService.getEvents([EventStatus.UPCOMING, EventStatus.DRAFT]);
     }
 
     @Get('/:id/dashboard')

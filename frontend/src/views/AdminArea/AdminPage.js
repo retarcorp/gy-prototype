@@ -1,6 +1,7 @@
 import withAdminWrapper from "./AdminWrapper"
 
 function AdminPage() {
+    window.location.href = '/admin/events';
     return <> </>
 }
 
