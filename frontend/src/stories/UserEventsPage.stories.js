@@ -1,4 +1,4 @@
-import EventsPage from "../views/UserArea/Events/EventsPage";
+import EventsPage from "../views/UserArea/Events/EventsPageView";
 
 export default {
     title: 'User/EventsPage',

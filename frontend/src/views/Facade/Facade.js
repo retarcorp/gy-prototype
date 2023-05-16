@@ -15,7 +15,7 @@ export default function Facade({ mode = 'loading' }) {
     const dispatch = useDispatch();
     useEffect(() => {
         dispatch(validateToken());
-    }, [])
+    }, [dispatch])
 
     useEffect(() => { setInternalMode(mode); }, [mode])
     useEffect(() => {
@@ -33,7 +33,7 @@ export default function Facade({ mode = 'loading' }) {
             setInternalMode('auth');
         }
 
-    }, [currentUser, isLoading])
+    }, [currentUser, isLoading, dispatch])
 
     return <>
         {internalMode === 'loading' ? <AuthStub /> : null}

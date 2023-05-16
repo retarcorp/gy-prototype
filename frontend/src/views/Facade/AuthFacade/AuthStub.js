@@ -1,6 +1,6 @@
 import { Backdrop, CircularProgress } from "@mui/material";
 
-export default function() {
+export default function AuthStub() {
 
     return <>
         <Backdrop open>

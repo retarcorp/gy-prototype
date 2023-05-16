@@ -8,7 +8,6 @@ import WarningIcon from '@mui/icons-material/Warning';
 
 
 export default function EventCard({ event, children}: { event: Event; children?: ElementType<any> | any }): JSX.Element {
-
     const draftAlert = <Grid container>
         <WarningIcon color="warning" fontSize="small" style={{ marginRight: '5px' }} />
         <Typography variant="caption" style={{ verticalAlign: 'middle' }} color={'orange'}>

@@ -1,15 +1,11 @@
 import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material"
 import MenuIcon from '@mui/icons-material/Menu';
-import { useDispatch } from "react-redux";
-import { logOut } from "../../store/user";
+import useLogOut from "../../hooks/useLogOut";
 
 export default function withAdminWrapper(Component) {
     return function AdminWrapper(props) {
-        const dispatch = useDispatch();
-        const onLogOut = () => {
 
-            dispatch(logOut())
-        }
+        const onLogOut = useLogOut();
 
         return <>
             <Box sx={{ flexGrow: 1 }}>

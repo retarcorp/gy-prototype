@@ -1,5 +1,6 @@
 import { createSlice, configureStore, combineReducers } from '@reduxjs/toolkit'
 import userSlice from './user'
+import userEventsSlice from './userEvents'
 
 const counterSlice = createSlice({
   name: 'counter',
@@ -23,7 +24,11 @@ const counterSlice = createSlice({
 export const { incremented, decremented } = counterSlice.actions
 
 const store = configureStore({
-  reducer: combineReducers({user: userSlice.reducer, counter: counterSlice.reducer}),
+  reducer: combineReducers({
+    user: userSlice.reducer, 
+    counter: counterSlice.reducer,
+    userEvents: userEventsSlice.reducer,
+  }),
 })
 
 export default store;

@@ -1,16 +1,20 @@
 import { AppBar, Box, Button, IconButton, Toolbar, Typography } from "@mui/material"
 import MenuIcon from '@mui/icons-material/Menu';
-import { useDispatch } from "react-redux";
-import { logOut } from "../../store/user";
+import useLogOut from "../../hooks/useLogOut";
+import { useDispatch, useSelector } from "react-redux";
+import { validateToken } from "../../store/user";
+import { useEffect, useState } from "react";
 
 export default function withUserWrapper(Component) {
     return function UserWrapper(props) {
 
-        const dispatch = useDispatch();
-        const onLogOut = () => {
-
-            dispatch(logOut())
+        const [internalMode, setInternalMode] = useState('idle');
+        const doLogOut = useLogOut();
+        const logOut = () => {
+            doLogOut();
+            window.location.href = '/';
         }
+
 
         return <>
             <Box sx={{ flexGrow: 1 }}>
@@ -28,7 +32,7 @@ export default function withUserWrapper(Component) {
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                             Have fun with us!
                         </Typography>
-                        <Button color="inherit" onClick={onLogOut}>Log Out</Button>
+                        <Button color="inherit" onClick={logOut}>Log Out</Button>
                     </Toolbar>
                 </AppBar>
 
@@ -38,5 +42,6 @@ export default function withUserWrapper(Component) {
             </Box>
 
         </>
+
     }
 }

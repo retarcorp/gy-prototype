@@ -31,18 +31,17 @@ export class UserController {
     }
   }
 
-  @Post('/users/:id/onboarding')
+  @Post('/users/onboarding')
   @WithAuth()
   async putOnboardingData(
     @Body() onboardingData: any,
-    @Param('id', ParseIntPipe) userId: number,
     @CurrentUser('id') currentUserId: number
   ): Promise<UserModel | any> {
 
-    if (currentUserId !== userId) {
+    if (!currentUserId) {
       throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
     }
-    return this.userService.putOnboardingData(userId, onboardingData);
+    return this.userService.putOnboardingData(currentUserId, onboardingData);
   }
 
   @Get('/users/validate')

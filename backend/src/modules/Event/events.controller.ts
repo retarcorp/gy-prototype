@@ -80,7 +80,6 @@ export class EventsController {
     async getAvailableEvents(
         @CurrentUser('id', ParseIntPipe) userId: number
     ): Promise<Event[]> {
-        console.log(userId);
         return await this.eventsService.getAvailableEvents(userId);
     }
 
@@ -89,7 +88,7 @@ export class EventsController {
     async getRegisteredEvents(
         @CurrentUser('id', ParseIntPipe) userId: number
     ): Promise<Array<Registration & {event: Event}>> {
-        return await this.eventsService.getUserRegisterations(userId);
+        return await this.eventsService.getUserRegistrations(userId);
     }
 
     @Get('/participated')

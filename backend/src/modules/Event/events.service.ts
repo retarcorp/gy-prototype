@@ -112,7 +112,7 @@ export class EventsService {
 
     async deleteRegistration(userId: number, eventId: number): Promise<boolean> {
 
-        const registrations = await this.getUserRegisterations(userId);
+        const registrations = await this.getUserRegistrations(userId);
         const targetRegistration = registrations.find(registration => registration.eventId === eventId);
 
         if (!targetRegistration) {
@@ -135,7 +135,7 @@ export class EventsService {
 
     async getAvailableEvents(userId: number): Promise<Event[]> {
 
-        const registrations = await this.getUserRegisterations(userId);
+        const registrations = await this.getUserRegistrations(userId);
 
         const events = await this.prismaClient.event.findMany({
             where: {
@@ -165,7 +165,8 @@ export class EventsService {
         })
     }
 
-    async getUserRegisterations(userId: number): Promise<Array<Registration & { event: Event }>> {
+    async getUserRegistrations(userId: number): Promise<Array<Registration & { event: Event }>> {
+        console.log(userId);
         return (await this.prismaClient.registration.findMany({
             where: {
                 userId: userId,

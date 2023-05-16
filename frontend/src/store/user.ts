@@ -8,6 +8,7 @@ const userSlice = createSlice({
         value: 0,
         isLoading: false,
         internalError: null as Error | null,
+        isTokenChecked: false,
     },
     reducers: {
         setIsLoading(state, { payload }) {
@@ -19,11 +20,26 @@ const userSlice = createSlice({
         setUserData(state, { payload }) {
             state.user = payload.user;
             state.token = payload.token;
+            state.isTokenChecked = true;
             sessionStorage.setItem('token', payload.token);
+        },
+        setUser(state, { payload }) {
+            state.user = payload;
         }
-
     }
 })
+
+export const getAuthHeaders = (): { [key: string]: string } => {
+    const token = sessionStorage.getItem('token');
+
+    if (token === null || token === 'null') {
+        return {};
+    }
+
+    return {
+        'Authorization': 'Bearer ' + token,
+    };
+}
 
 const { actions } = userSlice;
 
@@ -41,7 +57,7 @@ export const signUp = (email: string, password: string) => (dispatch: Function) 
             return res.json()
         })
         .then(json => {
-            dispatch(actions.setUserData({user: json.user, token: json.auth.token}));
+            dispatch(actions.setUserData({ user: json.user, token: json.auth.token }));
             dispatch(userSlice.actions.setIsLoading({ value: false }));
         })
         .catch(err => {
@@ -65,7 +81,7 @@ export const signIn = (email: string, password: string) => (dispatch: Function) 
             return res.json()
         })
         .then(json => {
-            dispatch(actions.setUserData({user: json.user, token: json.auth.token}));
+            dispatch(actions.setUserData({ user: json.user, token: json.auth.token }));
             dispatch(userSlice.actions.setIsLoading({ value: false }));
 
         })
@@ -111,6 +127,33 @@ export const validateToken = () => (dispatch: Function) => {
         .catch(err => {
             dispatch(actions.setIsLoading({ value: false }));
             dispatch(actions.setInternalError(err.message));
+        });
+}
+
+export const submitOnboarding = (onboardingData: { [key: string]: string }) => (dispatch: Function) => {
+    dispatch(actions.setIsLoading({ value: true }));
+
+
+    fetch(`http://localhost:8000/users/onboarding`, {
+        method: 'POST',
+        headers: { ...getAuthHeaders() },
+        body: new URLSearchParams(onboardingData)
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+
+            dispatch(actions.setUser(json));
+        })
+        .catch(err => {
+            console.error(err);
+        })
+        .finally(() => {
+            dispatch(actions.setIsLoading({ value: false }));
         });
 }
 
