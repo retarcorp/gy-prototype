@@ -7,12 +7,16 @@ const adminEventsSlice = createSlice({
     name: 'adminEvents',
     initialState: {
         events: [],
+        dashboard: null,
     },
     reducers: {
         setEvents(state, { payload }) {
             state.events = payload || [];
+        },
+        setDashboard(state, { payload }) {
+            state.dashboard = payload;
         }
-    }
+    },
 })
 
 export const fetchEvents = () => (dispatch: Function) => {
@@ -88,6 +92,27 @@ export const updateEvent = (event: Event) => (dispatch: Function) => {
                 throw new Error(res.statusText);
             }
             dispatch(fetchEvents());
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+export const fetchEventDashboard = (id: number | string) => (dispatch: Function) => {
+    return fetch(`${HOST}/events/${id}/dashboard`, {
+        method: 'GET',
+        headers: {
+            ...getAuthHeaders(),
+        }
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+            dispatch(adminEventsSlice.actions.setDashboard(json));
         })
         .catch(err => {
             console.error(err);

@@ -1,10 +1,11 @@
 import { useParams } from "react-router"
 import AdminManageEventPage from "./AdminManageEventPage"
-import React, { useEffect } from 'react'
+import React from 'react'
 import withAdminWrapper, { withAdminAuthWrapper } from "../AdminWrapper"
-import { useDispatch, useSelector } from "react-redux"
+import { useDispatch } from "react-redux"
 import { Event } from "../../../types/Event"
-import { createEvent, fetchEvents, updateEvent } from "../../../store/adminEvents"
+import { createEvent, updateEvent } from "../../../store/adminEvents"
+import useFetchAdminEvents from "../../../hooks/useFetchAdminEvents"
 
 const wrap = (C: () => JSX.Element) => withAdminAuthWrapper(withAdminWrapper(C))
 const cancel = () => { window.location.href = '/admin/events'; }
@@ -28,19 +29,10 @@ export const CreateEventPage = wrap(() => {
 
 export const UpdateEventPage = wrap(() => {
 
-    const eventId = useParams<{ id: string }>().id;
-    const currentEvent = useSelector((state: any) => state.adminEvents.events.find((e: Event) => String(e.id) === eventId))
-    const formattedEvent = currentEvent ? {
-        ...currentEvent,
-        dateTime: new Date(currentEvent.datetime),
-        isDraft: currentEvent.status === 'DRAFT'
-    } : null;
-
-    useEffect(() => {
-        dispatch<any>(fetchEvents());
-    }, [eventId]);
-
     const dispatch = useDispatch();
+    const eventId = useParams<{ id: string }>().id;
+    const { currentEvent } = useFetchAdminEvents(eventId);
+
     const save = (rawEvent: Partial<Event> & any) => {
         const event = {
             ...rawEvent,
@@ -56,7 +48,7 @@ export const UpdateEventPage = wrap(() => {
 
     return <>
         Editing event {eventId}. 
-        {formattedEvent ?  <AdminManageEventPage event={formattedEvent} onSave={save} onCancel={cancel}/> : 'Loading...'}
+        {currentEvent ?  <AdminManageEventPage event={currentEvent} onSave={save} onCancel={cancel}/> : 'Loading...'}
        
     </>
 

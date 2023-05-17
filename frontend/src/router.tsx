@@ -10,6 +10,7 @@ import UserEventsPage from "./views/UserArea/Events/UserEventsPage";
 import OnboardingPage from "./views/UserArea/Onboarding/OnboardingPage";
 import EventPage from "./views/UserArea/EventProcess/EventPage";
 import { CreateEventPage, UpdateEventPage } from "./views/AdminArea/AdminEvents/UpsertEventPage";
+import AdminEventDashboardPage from "./views/AdminArea/EventDashboard/AdminEventDashboardPage";
 
 const router = createBrowserRouter([
   {
@@ -35,7 +36,7 @@ const router = createBrowserRouter([
     element: <CreateEventPage />
   }, {
     path: "/admin/events/:id",
-    element: (() => withAdminWrapper(() => <div>Event Dashboard - TBD</div>)()) as unknown as ReactNode
+    element: <AdminEventDashboardPage />
   }, {
     path: '/user/onboarding',
     element: <OnboardingPage />
