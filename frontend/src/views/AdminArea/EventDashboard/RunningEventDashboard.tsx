@@ -7,30 +7,41 @@ import colors from '../../../testData/colors.js';
 import { GameComponent, ParticipantsComponent, TablesComponent } from '../../../components/RunningGameComponents';
 
 type RunningEventDashboardProps = {
-    event: Event
+    event: Event,
+    game: any,
+    onNextRound: Function,
 }
 
 export default function RunningEventDashboard(props: RunningEventDashboardProps) {
 
-    const [participants, setParticipants] = React.useState<any[]>([]);
-    const [tables, setTables] = React.useState<any[]>([]);
+    const participants = props.game.participants;
+    const participatedUsers = participants.map((p: any) => p.user);
+    const tables = props.game.tables;
+    const currentRound = props.game.rounds.find((r: any) => r.id === props.game.currentRoundId);
+    
+    const isFinalRound = currentRound.id === props.game.rounds[props.game.rounds.length - 1].id;
+    const currentRoundIndex = props.game.rounds.indexOf(currentRound);
+
+    const getTable = (id: any) => tables.find((t: any) => t.id === id);
+    const getUser = (id: any) => participants.find((p: any) => p.id === id)?.user;
+
     const [started, setStarted] = React.useState<any>(null);
-    const [round, setRound] = React.useState<any>(null);
+    const [roundRenderData, setRoundRenderData] = React.useState<any>(null);
+    
 
     useEffect(() => {
-        const initialParticipants = testParticipants.sort(() => Math.random() - 0.5);
-        setParticipants(initialParticipants);
-
-        const initialTables = testParticipants.map(() => colors[Math.floor(Math.random() * colors.length)]) as string[];
-        setTables(initialTables);
         setStarted(new Date());
-        setRound(initialTables.map((t: string) => ({
-            table: t,
-            player1: initialParticipants[Math.floor(Math.random() * participants.length)],
-            player2: initialParticipants[Math.floor(Math.random() * participants.length)],
-        })));
-    }, []);
-    const [currentTab, setCurrentTab] = React.useState(0);
+        const arrangements = props.game.tableArrangements.filter((a: any) => a.roundId === currentRound.id);
+
+        const renderData = arrangements.map((a: any) => ({
+            table: getTable(a.tableId).title,
+            player1: getUser(a.participantAId),
+            player2: getUser(a.participantBId),
+        }));
+        setRoundRenderData(renderData);
+    }, [currentRound]);
+
+    const [currentTab, setCurrentTab] = React.useState(1);
 
     return <Box>
         <Grid container spacing={2}>
@@ -46,8 +57,8 @@ export default function RunningEventDashboard(props: RunningEventDashboardProps)
                 </Tabs>
 
                 <Box>
-                    {currentTab === 0 && <GameComponent {...props} started={started} round={round}/>}
-                    {currentTab === 1 && <ParticipantsComponent {...props} participants={participants} />}
+                    {currentTab === 0 && <GameComponent next={props.onNextRound} {...props} started={started} round={roundRenderData} isFinal={isFinalRound} rounds={props.game.rounds.length} currentRoundIndex={currentRoundIndex}/>}
+                    {currentTab === 1 && <ParticipantsComponent {...props} participants={participatedUsers} />}
                     {currentTab === 2 && <TablesComponent {...props} tables={tables}></TablesComponent>}
                 </Box>
             </Grid>

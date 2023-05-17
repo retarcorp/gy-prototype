@@ -4,21 +4,21 @@ import { useDispatch, useSelector } from "react-redux";
 
 export default function useFetchAdminEvents(currentEventId: string | null = null): any {
 
-    const events = useSelector((state: any) => state.adminEvents.events.map((e: any) => ({
-        ...e,
-        dateTime: new Date(e.datetime),
-        isDraft: e.status === 'DRAFT'
-    })));
-
-    const currentEvent = currentEventId ? events.find((e: any) => String(e.id) === currentEventId) : null;
-
-
     const dispatch = useDispatch();
+
+    const formatEvent = (event: any) => ({
+        ...event,
+        dateTime: new Date(event.datetime),
+        isDraft: event.status === 'DRAFT'
+    });
+
+    const events = useSelector((state: any) => state.adminEvents.events.map(formatEvent));
+    const currentEvent = currentEventId ? events.find((e: any) => String(e.id) === currentEventId) : null;
 
     useEffect(() => {
         dispatch<any>(fetchEvents());
     }, [currentEventId]);
 
-    return { events, currentEvent };
+    return { events, currentEvent, formatEvent };
 
 }

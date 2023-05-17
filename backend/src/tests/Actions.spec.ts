@@ -58,6 +58,18 @@ describe('Test-purpose actions, with side effects!', () => {
         await Promise.all(users.map(user => eventService.registerOnEvent(user.id, testSuit.eventId)));
     })
 
+    const enrollAllToEvent = () => it('Can enroll all users to an event', async () => {
+        const EVENT_ID = 157;
+        const event = await prismaClient.event.findFirst({ where: { id: EVENT_ID } });
+        const registrations = await prismaClient.registration.findMany({ where: { eventId: EVENT_ID } });
+        
+        const promises = registrations.map(async registration => {
+            await eventService.enrollOnEvent(registration.id);
+        })
+        await Promise.all(promises);
+    })
 
-    registerAndAddToEventNPeople();
+
+    // registerAndAddToEventNPeople();
+    enrollAllToEvent();
 })

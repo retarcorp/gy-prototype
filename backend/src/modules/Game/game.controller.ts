@@ -21,6 +21,12 @@ export class GameController {
         return null as never;
     }
 
+    @Get('/event/:id')
+    @WithAuth()
+    async getGameByEventId(@Param('id', ParseIntPipe) eventId: number): Promise<Game> {
+        return await this.gameUtilsService.getGameByEventId(eventId);
+    }
+    
     @Post('/start')
     @AdminOnly()
     async startGame(@Body('eventId', ParseIntPipe) eventId: number): Promise<GameSetup> {
@@ -89,12 +95,4 @@ export class GameController {
             throw new HttpException(e.message, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-    // User: toggle like
-    // User: put note for entry
-    // User: get list of entries/records
-    // User: update list of entries/records
-
-
-
 }

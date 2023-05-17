@@ -22,6 +22,13 @@ export class EventsController {
         return await this.eventsService.getEvents([EventStatus.UPCOMING, EventStatus.DRAFT]);
     }
 
+    @Get('/viewable')
+    @AdminOnly()
+    async getViewableEvents(): Promise<any> {
+        return await this.eventsService.getEvents([EventStatus.UPCOMING, EventStatus.DRAFT, EventStatus.OPEN, EventStatus.RUNNING, EventStatus.FINAL, EventStatus.CLOSED]);
+    }
+
+
     @Get('/:id/dashboard')
     @AdminOnly()
     async getEventDashboard(@Param('id', ParseIntPipe) eventId: number): Promise<any> {
@@ -107,7 +114,7 @@ export class EventsController {
         @Param('pin') pin: string
     ): Promise<any> {
         try {
-            await this.eventsService.validateAndFetchRegistration(eventId, userId, pin);
+            await this.eventsService.validateAndFetchRegistration(userId, eventId, pin);
             return { 
                 valid: true
             }
@@ -126,10 +133,20 @@ export class EventsController {
         @Param('pin') pin: string
     ): Promise<any> {
         
-        const registration = await this.eventsService.validateAndFetchRegistration(eventId, userId, pin);
+        const registration = await this.eventsService.validateAndFetchRegistration(userId, eventId, pin);
         const participant = await this.eventsService.enrollOnEvent(registration.id);
 
         return participant;
+    }
+
+    @Delete('/:id/participation/:userId')
+    @AdminOnly()
+    async unEnrollUser(
+        @Param('id', ParseIntPipe) eventId: number,
+        @Param('userId', ParseIntPipe) userId: number
+    ): Promise<Registration> {
+        const result: Registration = await this.eventsService.unEnrollUser(userId, eventId);
+        return result
     }
 
 

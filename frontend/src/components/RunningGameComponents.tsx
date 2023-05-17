@@ -11,7 +11,7 @@ const formatTime = (time: number) => {
     return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
 }
 
-export const GameFinalComponent = (props: { event: Event, started: any, }) => {
+export const GameFinalComponent = (props: { event: Event, started: any, onClose: () => void}) => {
     const [time, setTime] = React.useState((new Date() as unknown as number - props.started || new Date().getTime()) / 1000);
     useEffect(() => {
         const interval = setInterval(() => {
@@ -27,7 +27,7 @@ export const GameFinalComponent = (props: { event: Event, started: any, }) => {
                 <Typography variant="h1">{formatTime(time)}</Typography>
                 <Typography variant="body1">The final stage of the game requires the administrator to patiently wait until all users have completed and finalized their results before officially closing the game. It is a crucial step to ensure that all scores and points have been calculated accurately, and that no user is left behind. The administrator must exercise caution and precision during this phase, as any discrepancies or miscalculations could result in unfair outcomes or unresolved tensions. Once all users have completed their tasks, the administrator can confidently close the game, bringing it to a successful conclusion.</Typography>
                 <Box marginTop={2}>
-                    <Button variant='contained' color='success' startIcon={<DoneOutlineIcon />}>Close game</Button>
+                    <Button onClick={props.onClose} variant='contained' color='success' startIcon={<DoneOutlineIcon />}>Close game</Button>
                 </Box>
             </Grid>
         </Grid>
@@ -35,11 +35,15 @@ export const GameFinalComponent = (props: { event: Event, started: any, }) => {
 
 }
 
-export const GameComponent = (props: { event: Event, started: any, round: any }) => {
+export const GameComponent = (props: {
+    event: Event,
+    next: Function,
+    started: any, round: any, isFinal: boolean, rounds: number, currentRoundIndex: number
+}) => {
 
-    const nextButton = Math.random() > 0.5
-        ? <Button variant='contained' color='success' startIcon={<DoneOutlineIcon />}>Final</Button>
-        : <Button variant='contained' color='primary' startIcon={<StartIcon />}>Next round</Button>;
+    const nextButton = props.isFinal
+        ? <Button onClick={() => props.next()} variant='contained' color='success' startIcon={<DoneOutlineIcon />}>Final</Button>
+        : <Button onClick={() => props.next()} variant='contained' color='primary' startIcon={<StartIcon />}>Next round</Button>;
 
     const [time, setTime] = React.useState((new Date() as unknown as number - props.started || new Date().getTime()) / 1000);
     useEffect(() => {
@@ -52,7 +56,7 @@ export const GameComponent = (props: { event: Event, started: any, round: any })
     return <Box padding={1}>
         <Grid container spacing={2}>
             <Grid item xs={12}>
-                <Typography variant="h5" marginBottom={1}>Round 5 of 17</Typography>
+                <Typography variant="h5" marginBottom={1}>Round {props.currentRoundIndex + 1} of {props.rounds}</Typography>
                 <Grid container spacing={2} alignItems={'center'}>
                     <Grid item>
                         <Typography variant="h1">{formatTime(time)}</Typography>
@@ -101,16 +105,16 @@ export const GameComponent = (props: { event: Event, started: any, round: any })
 }
 
 export const ParticipantsComponent = (props: { event: Event, participants: any[] }) => <Grid container spacing={1}>
-    {props.participants.map(p => <Grid key={p.nickname} item xs={12} sm={6} md={4} lg={6} xl={4} >
+    {props.participants.map(p => <Grid key={p.id} item xs={12} sm={6} md={4} lg={6} xl={4} >
         <UserCard title={p.name + '(' + p.nickname + ')'} subtitle={p.phone + ' | ' + p.email} />
     </Grid>)}
 </Grid>
 
 export const TablesComponent = (props: { event: Event, tables: any[] }) => <Grid container spacing={1}>
-    {props.tables.map((t, i) => <Grid key={i} item xs={12} sm={6} md={4} lg={6} xl={4} >
+    {props.tables.map((t, i) => <Grid key={t.id} item xs={12} sm={6} md={4} lg={6} xl={4} >
         <Card>
             <CardContent>
-                <Typography variant="h5">Table {i + 1}: {t}</Typography>
+                <Typography variant="h5">Table {i + 1}: {t.title}</Typography>
             </CardContent>
         </Card>
     </Grid>)}

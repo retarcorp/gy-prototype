@@ -39,7 +39,10 @@ export class EventsService {
 
         const eventEdit: Partial<Event> =
             allowedFields.reduce((prev: Partial<Event>, key: string) => key in eventData ? { [key]: eventData[key], ...prev } : prev, {});
-        eventEdit.participantLimit = parseInt(eventEdit.participantLimit as any);
+
+        if ('participantLimit' in eventEdit && typeof eventEdit.participantLimit !== 'number') {
+            eventEdit.participantLimit = parseInt(eventEdit.participantLimit as any);
+        }
 
         const canUpdate = ([EventStatus.DRAFT, EventStatus.UPCOMING] as EventStatus[]).includes(event.status)
         if (!canUpdate) {
@@ -88,7 +91,7 @@ export class EventsService {
             throw new HttpException('Event not found!', HttpStatus.NOT_FOUND);
         }
 
-        if (event.status !== EventStatus.UPCOMING) {
+        if (!([EventStatus.UPCOMING, EventStatus.OPEN] as EventStatus[]).includes(event.status)) {
             throw new HttpException('Cannot register on event that is not in upcoming status', HttpStatus.FORBIDDEN);
         }
 
@@ -118,8 +121,10 @@ export class EventsService {
 
     async deleteRegistration(userId: number, eventId: number): Promise<boolean> {
 
-        const registrations = await this.getUserRegistrations(userId);
-        const targetRegistration = registrations.find(registration => registration.eventId === eventId);
+        const targetRegistration = await this.prismaClient.registration.findFirst({
+            where: { userId, eventId },
+            include: { event: true }
+        });
 
         if (!targetRegistration) {
             throw new HttpException('User not registered on this event!', HttpStatus.NOT_FOUND);
@@ -129,13 +134,7 @@ export class EventsService {
             throw new HttpException('Cannot unregister from event that is not in upcoming status', HttpStatus.FORBIDDEN);
         }
 
-        await this.prismaClient.registration.deleteMany({
-            where: {
-                userId: userId,
-                eventId: eventId,
-            }
-        });
-
+        await this.prismaClient.registration.deleteMany({ where: { userId, eventId, } });
         return true;
     }
 
@@ -172,14 +171,11 @@ export class EventsService {
     }
 
     async getUserRegistrations(userId: number): Promise<Array<Registration & { event: Event }>> {
-        return (await this.prismaClient.registration.findMany({
-            where: {
-                userId: userId,
-            },
-            include: {
-                event: true,
-            }
-        })).filter(registration => ([EventStatus.UPCOMING, EventStatus.OPEN] as EventStatus[]).includes(registration.event.status));
+        const allRegistrations = (await this.prismaClient.registration.findMany({
+            where: { userId },
+            include: { event: true, }
+        }))
+        return allRegistrations.filter(registration => ([EventStatus.UPCOMING, EventStatus.OPEN] as EventStatus[]).includes(registration.event.status));
     }
 
     async getUserParticipations(userId: number, statuses: EventStatus[] = [EventStatus.OPEN]): Promise<Array<Participant & { event: Event }>> {
@@ -290,6 +286,27 @@ export class EventsService {
         await this.deleteRegistration(registration.userId, registration.eventId);
 
         return participant;
+    }
+
+    async unEnrollUser(userId: number, eventId: number): Promise<Registration> {
+        const participant = await this.prismaClient.participant.findFirst({
+            where: { userId, eventId, },
+            include: { event: true }
+        });
+
+        if (!participant) {
+            throw new HttpException('Participant not found!', HttpStatus.NOT_FOUND);
+        }
+
+        if (participant.event.status !== EventStatus.OPEN) {
+            throw new HttpException('Cannot unenroll from event that is not in open status', HttpStatus.FORBIDDEN);
+        }
+
+        await this.prismaClient.participant.deleteMany({
+            where: { userId, eventId, }
+        });
+
+        return await this.registerOnEvent(userId, eventId);
     }
 
 }
