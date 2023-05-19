@@ -11,6 +11,7 @@ import OnboardingPage from "./views/UserArea/Onboarding/OnboardingPage";
 import EventPage from "./views/UserArea/EventProcess/EventPage";
 import { CreateEventPage, UpdateEventPage } from "./views/AdminArea/AdminEvents/UpsertEventPage";
 import AdminEventDashboardPage from "./views/AdminArea/EventDashboard/AdminEventDashboardPage";
+import GamePage from "./views/UserArea/EventProcess/GamePage";
 
 const router = createBrowserRouter([
   {
@@ -46,6 +47,9 @@ const router = createBrowserRouter([
   }, {
     path: '/user/events/:id',
     element: <EventPage />,
+  }, {
+    path: '/user/events/:id/game',
+    element: <GamePage />
   }
 ]);
 

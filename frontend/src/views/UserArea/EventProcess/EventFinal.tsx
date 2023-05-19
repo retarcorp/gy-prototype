@@ -7,6 +7,10 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import participants from '../../../testData/participants.js'
 
 type EventFinalProps = {
+    likes: any[];
+    notes: any[];
+    partners: any[];
+    onSave: (entries: any[]) => void;
 }
 
 export default function EventFinal(props: EventFinalProps) {
@@ -16,23 +20,28 @@ export default function EventFinal(props: EventFinalProps) {
 
 
     useEffect(() => {
-        setData(participants.map((p: any) => {
+        setData(props.partners.map((p: any) => {
             return {
                 id: p.id,
                 name: p.name,
                 nickname: p.nickname,
-                isLiked: Math.random() > 0.5,
-                aboutMe: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec odio et massa finibus laoreet. Integer ut aliquam lacus, ',
-                note: 'dolor sit amet, consectetur adipiscing elit. Sed nec odio et massa finibus laoreet. Integer ut aliquam lacus, '
+                isLiked: Math.random() > 0.5, // TODO
+                aboutMe: p.aboutMe,
+                note: '' // TODO
             }
         }))
         setExpanded(participants.map(() => false));
-    }, [])
+    }, [props.partners])
+
     const toggle = (index: number) => {
         setExpanded(expanded.map((e, i) => i === index ? !e : e))
     }
     const updateEntry = (index: number, field: string, value: any) => {
         setData(data.map((e: any, i: number) => i === index ? { ...e, [field]: value } : e))
+    }
+
+    const saveEntries = () => {
+        return props.onSave(data.map(({id, isLiked, note}: any) => ({id, isLiked, note})))
     }
 
     return <Grid container direction={'column'} spacing={2} minHeight={'100vh'} textAlign={'center'} >
@@ -81,7 +90,7 @@ export default function EventFinal(props: EventFinalProps) {
         </Grid>
 
         <Grid item container justifyContent={'center'} spacing={2} marginTop={1}>
-            <Button variant="contained" color="primary" size="large" >Save and finish</Button>
+            <Button variant="contained" color="primary" size="large" onClick={saveEntries}>Save and finish</Button>
         </Grid>
     </Grid>
 }

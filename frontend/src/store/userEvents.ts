@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit'
 import { getAuthHeaders } from './user';
+import { HOST } from '../services/api';
 
 const userEventsSlice = createSlice({
     name: 'userEvents',
@@ -8,6 +9,10 @@ const userEventsSlice = createSlice({
         upcomingEvents: [],
         participatedEvents: [],
         registrations: [],
+        participation: null,
+        // TODO extract to separate state module
+        currentGameRoundSetup: null,
+        gamePreliminaryResults: null,
     },
     reducers: {
         setAvailableEvents(state, { payload }) {
@@ -16,12 +21,21 @@ const userEventsSlice = createSlice({
         setUpcomingEvents(state, { payload }) {
             state.upcomingEvents = (payload || []).map(e => e.event)
         },
-        setRegistrations(state, { payload }){
+        setRegistrations(state, { payload }) {
             state.registrations = (payload || []);
             state.upcomingEvents = (payload || []).map(e => e.event)
         },
         setParticipatedEvents(state, { payload }) {
-            state.participatedEvents = (payload || []);
+            state.participatedEvents = (payload || []).map(e => e.event);
+        },
+        setViewedParticipation(state, { payload }) {
+            state.participation = payload;
+        },
+        setGameRoundSetup(state, { payload }) {
+            state.currentGameRoundSetup = payload;
+        },
+        setGamePreliminaryResults(state, { payload }) {
+            state.gamePreliminaryResults = payload;
         }
     }
 })
@@ -64,7 +78,7 @@ export const getParticipatedEvents = () => (dispatch: Function) => {
 }
 
 export const loadAllEvents = () => (dispatch: Function) => {
-    return [loadUserEvents(), loadUpcomingEvents(), getParticipatedEvents()].map(f => f(dispatch)); 
+    return [loadUserEvents(), loadUpcomingEvents(), getParticipatedEvents()].map(f => f(dispatch));
 }
 
 export const registerOnEvent = (e: any) => (dispatch: Function) => {
@@ -103,6 +117,103 @@ export const unregisterFromEvent = (e: any) => (dispatch: Function) => {
         })
         .then(() => {
             dispatch(loadAllEvents());
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+export const fetchParticipation = (eventId: number) => (dispatch: Function) => {
+    return fetch(`${HOST}/events/${eventId}/participation/my/validate`, {
+        method: 'GET',
+        headers: {
+            ...getAuthHeaders(),
+        }
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+            if (json) {
+                dispatch(userEventsSlice.actions.setViewedParticipation(json.participation));
+                return json;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+export const fetchCurrentGameRoundSetup = (gameId: number) => (dispatch: Function) => {
+    return fetch(`${HOST}/games/${gameId}/round/current`, {
+        method: 'GET',
+        headers: {
+            ...getAuthHeaders(),
+        }
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+            if (json) {
+                dispatch(userEventsSlice.actions.setGameRoundSetup(json));
+                return json;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+export const fetchPreliminaryResults = (gameId: number) => (dispatch: Function) => {
+    return fetch(`${HOST}/games/${gameId}/results/preliminary`, {
+        method: 'GET',
+        headers: {
+            ...getAuthHeaders(),
+        }
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+            if (json) {
+                dispatch(userEventsSlice.actions.setGamePreliminaryResults(json));
+                return json;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+export const updateOpitionEntries = (gameId: number, entries: any[]) => (dispatch: Function) => {
+    return fetch(`${HOST}/games/${gameId}/results`, {
+        method: 'PUT',
+        headers: {
+            ...getAuthHeaders(),
+        },
+        body: new URLSearchParams({ entries: JSON.stringify(entries)})
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+            if (json) {
+                dispatch(fetchPreliminaryResults(gameId));
+                return json;
+            }
         })
         .catch(err => {
             console.error(err);

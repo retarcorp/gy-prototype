@@ -5,21 +5,26 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 type EventEnrollmentProps = {
+    roundCount: number;
+    currentRoundDisplayIndex: number;
+    partner: any;
+    tableName: string;
 }
 
 export default function EventParticipance(props: EventEnrollmentProps) {
 
+    // console.log(props.participation);
 
     return <Grid container direction={'column'} spacing={2} minHeight={'100vh'} textAlign={'center'} >
         <Grid item>
             <Paper elevation={0} style={{ padding: '1em' }}>
-                <Typography variant='caption'>Round 5 of 15</Typography>
+                <Typography variant='caption'>Round {props.currentRoundDisplayIndex} of {props.roundCount}</Typography>
             </Paper>
         </Grid>
 
         <Grid item>
             <Paper elevation={3} style={{ padding: '2em', backgroundColor: 'burlywood' }}>
-                <Typography variant="h5">Red Onion </Typography>
+                <Typography variant="h5">{props.tableName} </Typography>
                 <Typography variant="caption">Your current table</Typography>
             </Paper>
         </Grid>
@@ -30,7 +35,7 @@ export default function EventParticipance(props: EventEnrollmentProps) {
                 <CardHeader
                     avatar={
                         <Avatar sx={{ bgcolor: 'red[500]' }} aria-label="recipe">
-                            R
+                            {props.partner.name[0].toUpperCase()}
                         </Avatar>
                     }
                     action={
@@ -42,15 +47,15 @@ export default function EventParticipance(props: EventEnrollmentProps) {
                             
                         </>
                     }
-                    title="Alex"
-                    subheader="I feel good"
+                    title={props.partner.name}
+                    subheader={props.partner.nickname}
                 />
 
 
 
 
                 <CardContent>
-                    <Typography variant="body2" color="text.secondary">I'm a fun-loving, adventurous and open-minded guy who enjoys trying new things. I'm passionate about cooking, music, and travel. A good listener, empathetic and always up for a good laugh. Ambitious and hardworking, I believe in pursuing my dreams while staying grounded in reality. I value honesty, integrity, and kindness, and strive to treat others the way I want to be treated.     </Typography>
+                    <Typography variant="body2" color="text.secondary">{props.partner.aboutMe}</Typography>
                 </CardContent>
             </Card>
         </Grid>

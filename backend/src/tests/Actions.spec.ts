@@ -30,9 +30,9 @@ describe('Test-purpose actions, with side effects!', () => {
 
     })
 
-    const registerAndAddToEventNPeople = () => it('Can register, onboard and register N users for an event', async () => {
+    const registerAndAddToEventNPeople = (eventId) => it('Can register, onboard and register N users for an event', async () => {
         const N = 9;
-        const EVENT_ID = 157;
+        const EVENT_ID = eventId;
 
         const testSuit = {
             emails: new Array(N).fill(0).map((_, i) => `test-${i}-${Math.round(Math.random() * 10 ** 8)}@example.com`),
@@ -58,8 +58,15 @@ describe('Test-purpose actions, with side effects!', () => {
         await Promise.all(users.map(user => eventService.registerOnEvent(user.id, testSuit.eventId)));
     })
 
-    const enrollAllToEvent = () => it('Can enroll all users to an event', async () => {
-        const EVENT_ID = 157;
+    const openEvent = (eventId) => it('Can open an event', async () => {
+        await eventService.updateEvent(eventId, {
+
+            status: EventStatus.OPEN,
+        });
+    })
+
+    const enrollAllToEvent = (eventId) => it('Can enroll all users to an event', async () => {
+        const EVENT_ID = eventId;
         const event = await prismaClient.event.findFirst({ where: { id: EVENT_ID } });
         const registrations = await prismaClient.registration.findMany({ where: { eventId: EVENT_ID } });
         
@@ -69,7 +76,20 @@ describe('Test-purpose actions, with side effects!', () => {
         await Promise.all(promises);
     })
 
+    const startGame = (eventId) => it('Can start a game', async () => {
+        const game = await gameService.startGame(eventId);
+    })
 
-    // registerAndAddToEventNPeople();
-    enrollAllToEvent();
+    const moveToNextRound = (eventId) => it('Can move to next round', async () => {
+        const game = await gameUtilsService.getGameByEventId(eventId);
+        const newGame = await gameService.moveGameToNextRound(game.id);
+    });
+
+
+    const eventId = 159;
+    // registerAndAddToEventNPeople(eventId);
+    // openEvent(eventId);
+    // enrollAllToEvent(eventId);
+    // startGame(eventId);
+    moveToNextRound(eventId);
 })

@@ -149,5 +149,17 @@ export class EventsController {
         return result
     }
 
+    @Get('/:id/participation/my/validate') 
+    @WithAuth()
+    async validateMyParticipation(
+        @CurrentUser('id', ParseIntPipe) userId: number,
+        @Param('id', ParseIntPipe) eventId: number
+    ): Promise<{participation: Participant | null}> {
+        const participations = await this.eventsService.getUserParticipations(userId, [EventStatus.OPEN, EventStatus.RUNNING, EventStatus.FINAL]);
+        
+        const participation = participations.find(p => p.eventId === eventId);
+        return { participation: participation || null };
+    }
+
 
 }  

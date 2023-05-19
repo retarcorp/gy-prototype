@@ -13,7 +13,7 @@ export default class GameResultService {
         private readonly gameUtilsService: GameUtilsService,
     ) { }
 
-    async toggleLike(gameId: number, userId: number, targetUserId: number): Promise<boolean> {
+    async setLike(gameId: number, userId: number, targetUserId: number, like: boolean): Promise<boolean> {
         const isValidParticipants = (await this.gameUtilsService.isUserParticipant(gameId, userId))
             && (await this.gameUtilsService.isUserParticipant(gameId, targetUserId));
         if (!isValidParticipants) {
@@ -30,14 +30,17 @@ export default class GameResultService {
         }
 
         const likes = await this.prismaClient.gameLike.findMany({ where: { gameId, userId, targetUserId } });
-        if (likes.length > 0) {
+        if (likes.length && like) return true;
+        if (!likes.length && !like) return true;
+        if (likes.length && !like) {
             // Removing like
             await this.prismaClient.gameLike.deleteMany({ where: { gameId, userId, targetUserId } });
             return false;
         }
-
-        // Adding like
-        await this.prismaClient.gameLike.create({ data: { gameId, userId, targetUserId } });
+        if (!likes.length && like) {
+            // Adding like
+            await this.prismaClient.gameLike.create({ data: { gameId, userId, targetUserId } });
+        }
         return true;
     }
 
@@ -59,7 +62,7 @@ export default class GameResultService {
             });
             return;
         }
-
+        
         await this.prismaClient.userNotes.create({
             data: {
                 userId,

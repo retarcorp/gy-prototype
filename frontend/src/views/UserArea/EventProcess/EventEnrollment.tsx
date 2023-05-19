@@ -11,8 +11,6 @@ type EventEnrollmentProps = {
 
 export default function EventEnrollment(props: EventEnrollmentProps) {
 
-    console.log(props);
-
     const [code, setCode] = useState('');
     useEffect(() => {
         setCode(props.enrollmentPIN);

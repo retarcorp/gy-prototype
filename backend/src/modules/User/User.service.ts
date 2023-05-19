@@ -43,6 +43,14 @@ export class UserService {
 
     }
 
+    getPublicProfileById(userId: number): Promise<PublicProfile> {
+        return this.PrismaClient.user.findUnique({
+            where: {
+                id: userId
+            }
+        }).then(user => this.getPublicProfile(user));
+    }
+
     getPublicProfile(user: UserModel): PublicProfile {
         return {
             id: user.id,
