@@ -9,7 +9,7 @@ type EventEnrollmentProps = {
     currentRoundDisplayIndex: number;
     partner: any;
     tableName: string;
-    onSaveResultsEntry: (entry: any) => void;
+    onUpdateResultsEntry: (entry: any) => void;
 }
 
 export default function EventParticipance(props: EventEnrollmentProps) {
@@ -18,34 +18,19 @@ export default function EventParticipance(props: EventEnrollmentProps) {
     const [like, setLike] = React.useState(false);
     const [note, setNote] = React.useState('');
     const partnerId = props.partner ? props.partner.id : null;
-    const partnerRef = React.useRef({id: null});
-
 
     useEffect(() => {
-        const save = () => {
-            const entry = {
-                like,
-                note,
-                id: partnerRef?.current.id
-            }
-            if (entry.id) {
-                console.log(entry, partnerRef.current);
-                props.onSaveResultsEntry(entry)
-            }
+        const entry = {
+            like,
+            note,
+            id: partnerId
         }
-        save();
-
-        setLike(false);
-        setNote('');
-        partnerRef.current = props.partner;
-
-        return () => {
-            if (props.currentRoundDisplayIndex === props.roundCount) {
-                save();
-            }
+        if (entry.id) {
+            props.onUpdateResultsEntry(entry)
         }
+    }, [like, note])
 
-    }, [partnerId])
+    useEffect(() => { setLike(false); setNote('') }, [partnerId]);
 
     return <Grid container direction={'column'} spacing={2} minHeight={'100vh'} textAlign={'center'} >
         <Grid item>

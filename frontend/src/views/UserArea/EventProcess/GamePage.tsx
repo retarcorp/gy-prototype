@@ -8,6 +8,18 @@ import React from 'react';
 import EventParticipance from "./EventParticipance";
 import EventFinal from "./EventFinal";
 
+const debounce = (func: any, wait: number) => {
+    let timeout: any;
+    return function executedFunction(...args: any[]) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 const UserGamePage = () => {
     const eventId = parseInt(useParams().id as string);
     const dispatch = useDispatch();
@@ -45,6 +57,7 @@ const UserGamePage = () => {
     const onSaveResults = (entries: any[]) => {
         dispatch<any>(updateOpitionEntries(participation.gameId, entries));
     }
+    const debouncedSaveResults = React.useCallback(debounce(onSaveResults, 500), []);
 
     // TODO save likes and notes for user
 
@@ -55,7 +68,7 @@ const UserGamePage = () => {
                 roundCount={gameSetup.roundCount} 
                 currentRoundDisplayIndex={gameSetup.index + 1} 
                 partner={gameSetup.currentArrangement.partner} 
-                onSaveResultsEntry={(e) => onSaveResults([e])}
+                onUpdateResultsEntry={(e) => debouncedSaveResults([e])}
             />;
             case 'FINAL': return preliminaryResults ? <EventFinal likes={preliminaryResults.likes} notes={preliminaryResults.notes} partners={preliminaryResults.participatedUsers} onSave={onSaveResults}/> : 'Loading results...';
             default: return 'Unknown game status'
