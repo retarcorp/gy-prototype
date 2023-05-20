@@ -93,12 +93,18 @@ describe('Test-purpose actions, with side effects!', () => {
         await prismaClient.game.update({ where: { id: game.id }, data: { currentRoundId: firstRound, status: GameStatus.RUNNING } });
     });
 
+    const closeGame = (eventId) => it('Can close game', async () => {
+        const game = await gameUtilsService.getGameByEventId(eventId);
+        await gameService.closeGame(game.id);
+    })
+
     const eventId = 163;
     // registerAndAddToEventNPeople(eventId);
     // openEvent(eventId);
     // enrollAllToEvent(eventId);
     // startGame(eventId);
-    moveToNextRound(eventId);
+    // moveToNextRound(eventId);
     // setGameToTheBeginning(eventId);
+    closeGame(eventId);
 
 })

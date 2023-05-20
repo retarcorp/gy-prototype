@@ -13,6 +13,7 @@ const userEventsSlice = createSlice({
         // TODO extract to separate state module
         currentGameRoundSetup: null,
         gamePreliminaryResults: null,
+        gameFullResults: null,
     },
     reducers: {
         setAvailableEvents(state, { payload }) {
@@ -36,6 +37,9 @@ const userEventsSlice = createSlice({
         },
         setGamePreliminaryResults(state, { payload }) {
             state.gamePreliminaryResults = payload;
+        },
+        setGameFullResults(state, { payload }) {
+            state.gameFullResults = payload;
         }
     }
 })
@@ -212,6 +216,30 @@ export const updateOpitionEntries = (gameId: number, entries: any[]) => (dispatc
         .then(json => {
             if (json) {
                 dispatch(fetchPreliminaryResults(gameId));
+                return json;
+            }
+        })
+        .catch(err => {
+            console.error(err);
+        });
+}
+
+export const fetchEventResults = (eventId: number) => (dispatch: Function) => {
+    return fetch(`${HOST}/events/${eventId}/results`, {
+        method: 'GET',
+        headers: {
+            ...getAuthHeaders(),
+        }
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error(res.statusText);
+            }
+            return res.json()
+        })
+        .then(json => {
+            if (json) {
+                dispatch(userEventsSlice.actions.setGameFullResults(json));
                 return json;
             }
         })

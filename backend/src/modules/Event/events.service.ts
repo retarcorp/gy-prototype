@@ -178,7 +178,7 @@ export class EventsService {
         return allRegistrations.filter(registration => ([EventStatus.UPCOMING, EventStatus.OPEN] as EventStatus[]).includes(registration.event.status));
     }
 
-    async getUserParticipations(userId: number, statuses: EventStatus[] = [EventStatus.OPEN, EventStatus.RUNNING, EventStatus.FINAL]): Promise<Array<Participant & { event: Event }>> {
+    async getUserParticipations(userId: number, statuses: EventStatus[] = [EventStatus.OPEN, EventStatus.RUNNING, EventStatus.FINAL, EventStatus.CLOSED]): Promise<Array<Participant & { event: Event }>> {
         return (await this.prismaClient.participant.findMany({
             where: { userId: userId, },
             include: { event: true, }

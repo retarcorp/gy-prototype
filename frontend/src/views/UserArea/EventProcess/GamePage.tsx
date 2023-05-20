@@ -7,6 +7,7 @@ import { fetchCurrentGameRoundSetup, fetchParticipation, fetchPreliminaryResults
 import React from 'react';
 import EventParticipance from "./EventParticipance";
 import EventFinal from "./EventFinal";
+import EventResultsPage from "../Events/EventResultsPage";
 
 const debounce = (func: any, wait: number) => {
     let timeout: any;
@@ -52,14 +53,15 @@ const UserGamePage = () => {
         if (gameStatus === 'FINAL') {
             dispatch<any>(fetchPreliminaryResults(participation.gameId));
         }
+        if (gameStatus === 'CLOSED') {
+            window.location.href = `/user/events/${eventId}/results`;
+        }
     }, [gameStatus])
 
     const onSaveResults = (entries: any[]) => {
         dispatch<any>(updateOpitionEntries(participation.gameId, entries));
     }
     const debouncedSaveResults = React.useCallback(debounce(onSaveResults, 500), []);
-
-    // TODO save likes and notes for user
 
     const statusRender = (status: string) => {
         switch (status) {
@@ -71,7 +73,8 @@ const UserGamePage = () => {
                 onUpdateResultsEntry={(e) => debouncedSaveResults([e])}
             />;
             case 'FINAL': return preliminaryResults ? <EventFinal likes={preliminaryResults.likes} notes={preliminaryResults.notes} partners={preliminaryResults.participatedUsers} onSave={onSaveResults}/> : 'Loading results...';
-            default: return 'Unknown game status'
+            case 'CLOSED': return 'Redirecting to game results...'
+            default: return 'Unknown game status';
         }
     }
 

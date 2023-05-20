@@ -23,7 +23,10 @@ export default function EventsPageView({ available, upcoming, past, onRegister, 
 
     const onOpen = (e) => {
         // TODO open event page
-        console.log('Open event page', e);
+        if (e.status === 'CLOSED') {
+            return window.location.href = `/user/events/${e.id}/results`;
+
+        }
         window.location.href = `/user/events/${e.id}`;
     }
 

@@ -104,6 +104,13 @@ export class GameController {
                     currentArrangement: null,
                 }
             }
+            if (gameSetup.status === 'CLOSED') {
+                return {
+                    status: 'CLOSED',
+                    roundCount: gameSetup.rounds.length,
+                    currentArrangement: null,
+                }
+            }
 
             const setup = await this.gameService.getCurrentRoundSetup(gameId);
             const participantId = await this.gameService.getParticipantIdByUserId(userId, gameId);

@@ -90,7 +90,8 @@ export default function EventFinal(props: EventFinalProps) {
         </Grid>
 
         <Grid item container justifyContent={'center'} spacing={2} marginTop={1}>
-            <Button variant="contained" color="primary" size="large" onClick={saveEntries}>Save and finish</Button>
+            <Button variant="contained" color="primary" size="large" onClick={saveEntries}>Save</Button>
+            <Button variant="text" color="secondary" size="large" href="/user/events/">Back to event list</Button>
         </Grid>
     </Grid>
 }

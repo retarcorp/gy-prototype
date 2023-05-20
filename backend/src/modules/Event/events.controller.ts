@@ -1,12 +1,17 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { AdminOnly, CurrentUser, WithAuth } from '../User/Auth.guards';
 import { Event, EventStatus, Participant, Registration } from '@prisma/client';
+import GameResultService from '../Game/gameResult.service';
+import { GameService } from '../Game/game.service';
+import GameUtilsService from '../Game/gameUtils.service';
 
 @Controller('events')
 export class EventsController {
     constructor(
         private readonly eventsService: EventsService,
+        private readonly gameResultService: GameResultService,
+        private readonly gameutilsService: GameUtilsService
     ) { }
 
     @Get('/')
@@ -94,7 +99,7 @@ export class EventsController {
     @WithAuth()
     async getRegisteredEvents(
         @CurrentUser('id', ParseIntPipe) userId: number
-    ): Promise<Array<Registration & {event: Event}>> {
+    ): Promise<Array<Registration & { event: Event }>> {
         return await this.eventsService.getUserRegistrations(userId);
     }
 
@@ -102,7 +107,7 @@ export class EventsController {
     @WithAuth()
     async getParticipatedEvents(
         @CurrentUser('id', ParseIntPipe) userId: number
-    ): Promise<Array<Participant & {event: Event}>> {
+    ): Promise<Array<Participant & { event: Event }>> {
         return await this.eventsService.getUserParticipations(userId);
     }
 
@@ -115,7 +120,7 @@ export class EventsController {
     ): Promise<any> {
         try {
             await this.eventsService.validateAndFetchRegistration(userId, eventId, pin);
-            return { 
+            return {
                 valid: true
             }
         } catch (e) {
@@ -132,7 +137,7 @@ export class EventsController {
         @Param('userId', ParseIntPipe) userId: number,
         @Param('pin') pin: string
     ): Promise<any> {
-        
+
         const registration = await this.eventsService.validateAndFetchRegistration(userId, eventId, pin);
         const participant = await this.eventsService.enrollOnEvent(registration.id);
 
@@ -149,17 +154,39 @@ export class EventsController {
         return result
     }
 
-    @Get('/:id/participation/my/validate') 
+    @Get('/:id/participation/my/validate')
     @WithAuth()
     async validateMyParticipation(
         @CurrentUser('id', ParseIntPipe) userId: number,
         @Param('id', ParseIntPipe) eventId: number
-    ): Promise<{participation: Participant | null}> {
-        const participations = await this.eventsService.getUserParticipations(userId, [EventStatus.OPEN, EventStatus.RUNNING, EventStatus.FINAL]);
-        
+    ): Promise<{ participation: Participant | null }> {
+        const participations = await this.eventsService.getUserParticipations(userId, [EventStatus.OPEN, EventStatus.RUNNING, EventStatus.FINAL, EventStatus.CLOSED]);
+
         const participation = participations.find(p => p.eventId === eventId);
         return { participation: participation || null };
     }
 
+    @Get(':id/results')
+    @WithAuth()
+    async getMyEventResults(
+        @CurrentUser('id', ParseIntPipe) userId: number,
+        @Param('id', ParseIntPipe) eventId: number
+    ) {
+        const event = (await this.eventsService.getUserParticipations(userId, [EventStatus.FINAL, EventStatus.CLOSED]))
+            .map(({ event }) => event)
+            .find(({ id }) => id === eventId);
+
+        if (!event) {
+            throw new HttpException('User did not participate in this event!', HttpStatus.NOT_FOUND);
+        }
+
+        const game = await this.gameutilsService.getGameByEventId(eventId);
+        const results = await this.gameResultService.getUserGameResults(userId, game.id);
+
+        return {
+            results,
+            event
+        }
+    }
 
 }  
