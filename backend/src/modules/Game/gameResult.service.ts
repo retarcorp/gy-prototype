@@ -80,10 +80,10 @@ export default class GameResultService {
             include: { user: true },
         });
 
-        return notes.map(note => ({
+        return await Promise.all(notes.map(async note => ({
             ...note,
-            targetUser: this.userService.getPublicProfile(note.user),
-        }));
+            targetUser: await this.userService.getPublicProfileById(note.targetUserId),
+        })));
     }
 
     async getGameUserPreliminaryResults(gameId: number, userId: number): Promise<PreliminaryResults> {

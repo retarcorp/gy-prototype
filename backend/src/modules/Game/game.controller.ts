@@ -110,15 +110,29 @@ export class GameController {
 
             const userArrangement = setup.tableArrangements.find(a => [a.participantAId, a.participantBId].includes(participantId));
             const partnerPId = [userArrangement.participantAId, userArrangement.participantBId].find(pId => pId !== participantId);
+            if (partnerPId === null) {
+                // Now no partner in this round because of odd amount of participants 
+                return {
+                    ...setup,
+                    status: gameSetup.status,
+                    roundCount: gameSetup.rounds.length,
+                    currentArrangement: {
+                        partner: {
+                            id: null,
+                            name: 'No Partner in this round',
+                            aboutMe: 'In this round you have no partner because of odd amount of participants. Relax yourself for this round!',
+                        },
+                        userId,
+                        participantId,
+                        ...userArrangement
+                    }
+                }
+            }
             const partnerUid = await this.gameService.getUserIdByParticipantId(partnerPId);
 
             const partner = partnerUid ? await this.userService.getPublicProfileById(partnerUid) : null;
 
             const currentArrangement = {
-                table: {
-                    id: 0,
-                    title: 'Table'
-                },
                 partner,
                 userId,
                 participantId,

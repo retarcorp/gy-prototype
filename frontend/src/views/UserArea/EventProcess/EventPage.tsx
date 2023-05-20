@@ -6,7 +6,6 @@ import { Event } from "../../../types/Event"
 import { useDispatch, useSelector } from "react-redux";
 import { fetchParticipation, getParticipatedEvents, loadRegistrations } from "../../../store/userEvents";
 import EventEnrollment from "./EventEnrollment";
-import EventParticipance from "./EventParticipance";
 
 function EventPage() {
 
@@ -49,7 +48,7 @@ function EventPage() {
         }
     }, [event])
 
-    if (participation && eventStatus === 'RUNNING') {
+    if (participation && ['RUNNING', 'FINAL'].includes(eventStatus)) {
         window.location.href = '/user/events/' + eventId + '/game';
     }
 
@@ -57,7 +56,7 @@ function EventPage() {
         <>
             {registration ? <EventEnrollment {...registration} /> : null}
             {participation 
-                ? eventStatus === 'RUNNING' ? 'Redirecting to game...' : 'Game has not started yet...'
+                ? ['RUNNING', 'FINAL'].includes(eventStatus) ? 'Redirecting to game...' : 'Game has not started yet...'
                 : null
             }
         </>

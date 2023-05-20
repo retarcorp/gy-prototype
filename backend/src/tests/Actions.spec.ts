@@ -31,7 +31,7 @@ describe('Test-purpose actions, with side effects!', () => {
     })
 
     const registerAndAddToEventNPeople = (eventId) => it('Can register, onboard and register N users for an event', async () => {
-        const N = 9;
+        const N = 6;
         const EVENT_ID = eventId;
 
         const testSuit = {
@@ -85,11 +85,20 @@ describe('Test-purpose actions, with side effects!', () => {
         const newGame = await gameService.moveGameToNextRound(game.id);
     });
 
+    const setGameToTheBeginning = (eventId) => it('Can set game to the beginning', async () => {
+        const game = await gameUtilsService.getGameByEventId(eventId);
+        const gameSetup = await gameService.getGameSetup(game.id);
+        const firstRound = gameSetup.rounds.find(round => round.index === 0).id;
+        await prismaClient.event.update({ where: { id: eventId }, data: { status: EventStatus.RUNNING } });
+        await prismaClient.game.update({ where: { id: game.id }, data: { currentRoundId: firstRound, status: GameStatus.RUNNING } });
+    });
 
-    const eventId = 159;
+    const eventId = 163;
     // registerAndAddToEventNPeople(eventId);
     // openEvent(eventId);
     // enrollAllToEvent(eventId);
     // startGame(eventId);
     moveToNextRound(eventId);
+    // setGameToTheBeginning(eventId);
+
 })

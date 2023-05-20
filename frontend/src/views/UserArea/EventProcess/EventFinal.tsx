@@ -25,9 +25,9 @@ export default function EventFinal(props: EventFinalProps) {
                 id: p.id,
                 name: p.name,
                 nickname: p.nickname,
-                isLiked: Math.random() > 0.5, // TODO
+                isLiked: props.likes.some((l) =>  l.targetUserId === p.id), 
                 aboutMe: p.aboutMe,
-                note: '' // TODO
+                note: (n => n ? n.notes : '')(props.notes.find((n) => n.targetUserId === p.id)) 
             }
         }))
         setExpanded(participants.map(() => false));
@@ -41,7 +41,7 @@ export default function EventFinal(props: EventFinalProps) {
     }
 
     const saveEntries = () => {
-        return props.onSave(data.map(({id, isLiked, note}: any) => ({id, isLiked, note})))
+        return props.onSave(data.map(({id, isLiked, note}: any) => ({id, like: isLiked, note})))
     }
 
     return <Grid container direction={'column'} spacing={2} minHeight={'100vh'} textAlign={'center'} >

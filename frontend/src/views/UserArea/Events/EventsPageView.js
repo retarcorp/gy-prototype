@@ -24,6 +24,7 @@ export default function EventsPageView({ available, upcoming, past, onRegister, 
     const onOpen = (e) => {
         // TODO open event page
         console.log('Open event page', e);
+        window.location.href = `/user/events/${e.id}`;
     }
 
     const grid = (element, key) => <Grid key={key} item xs={12} xl={3} lg={4} md={6}>{element} </Grid>;
