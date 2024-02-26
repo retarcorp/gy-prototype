@@ -18,5 +18,8 @@ export default function SocialButtons(props) {
                     </IconButton>
                 </Grid>
             </Grid>
+            <Grid item xs={12}>
+                <Typography variant="caption" textAlign='center'>v1.0.1</Typography>
+            </Grid>
         </Grid></>
 }

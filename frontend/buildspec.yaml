@@ -4,5 +4,8 @@ phases:
   build:
     commands:
       - cd frontend
-      - npm install
+      - npm install --force
       - npm run build
+      - npm run deploy
+      - aws cloudfront create-invalidation --distribution-id "E1KJCOULUCTNVF" --paths "/*"
+
