@@ -59,20 +59,24 @@ const UserGamePage = () => {
     }, [gameStatus])
 
     const onSaveResults = (entries: any[]) => {
-        dispatch<any>(updateOpitionEntries(participation.gameId, entries));
+        console.log('saving results', entries);
+        console.log(participation?.gameId)
+        if (participation?.gameId) {
+            dispatch<any>(updateOpitionEntries(participation.gameId, entries));
+        }
     }
-    const debouncedSaveResults = React.useCallback(debounce(onSaveResults, 500), []);
+    const debouncedSaveResults = React.useCallback(debounce(onSaveResults, 500), [participation?.gameId]);
 
     const statusRender = (status: string) => {
         switch (status) {
-            case 'RUNNING': return <EventParticipance 
-                tableName={tableName} 
-                roundCount={gameSetup.roundCount} 
-                currentRoundDisplayIndex={gameSetup.index + 1} 
-                partner={gameSetup.currentArrangement.partner} 
+            case 'RUNNING': return <EventParticipance
+                tableName={tableName}
+                roundCount={gameSetup.roundCount}
+                currentRoundDisplayIndex={gameSetup.index + 1}
+                partner={gameSetup.currentArrangement.partner}
                 onUpdateResultsEntry={(e) => debouncedSaveResults([e])}
             />;
-            case 'FINAL': return preliminaryResults ? <EventFinal likes={preliminaryResults.likes} notes={preliminaryResults.notes} partners={preliminaryResults.participatedUsers} onSave={onSaveResults}/> : 'Loading results...';
+            case 'FINAL': return preliminaryResults ? <EventFinal likes={preliminaryResults.likes} notes={preliminaryResults.notes} partners={preliminaryResults.participatedUsers} onSave={onSaveResults} /> : 'Loading results...';
             case 'CLOSED': return 'Redirecting to game results...'
             default: return 'Unknown game status';
         }

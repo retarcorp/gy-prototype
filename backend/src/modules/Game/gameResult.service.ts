@@ -62,7 +62,7 @@ export default class GameResultService {
             });
             return;
         }
-        
+
         await this.prismaClient.userNotes.create({
             data: {
                 userId,
@@ -95,7 +95,7 @@ export default class GameResultService {
         const notes = (await this.getUserNotes(userId)).filter(note => targetUserIds.includes(note.targetUserId));
         const likes = await this.getGameUserLikes(gameId, userId);
 
-        const publicProfiles = (await this.prismaClient.user.findMany({ where: { id: { in: targetUserIds } } })).map(this.userService.getPublicProfile);
+        const publicProfiles = (await this.prismaClient.user.findMany({ where: { id: { in: targetUserIds } } })).map(v => this.userService.getPublicProfile(v));
 
         return {
             likes,
@@ -128,8 +128,23 @@ export default class GameResultService {
     }
 
     async getUserGameResults(userId: number, gameId: number): Promise<GameUserResultRecord[]> {
-        const records = await this.prismaClient.gameUserResultRecord.findMany({ where: { gameId, userId } });
-        return records;
+        const records = await this.prismaClient.gameUserResultRecord.findMany({ where: { gameId, userId }, include: { targetUser: true } });
+        const recordTargets = records.map(record => record.targetUserId);
+        const notes = await this.prismaClient.userNotes.findMany({ where: { userId, targetUserId: { in: recordTargets } } });
+
+        return records.map(record => {
+            const contactField = record.type === 'MATCH' ? 'contactsForMatches' : 'contactsForLikes';
+            const contacts = this.userService.getPublicProfile(record.targetUser, [contactField])[contactField];
+            return {
+                ...record,
+
+                targetUser: {
+                    ...this.userService.getPublicProfile(record.targetUser),
+                    contacts,
+                    notes: notes.find(note => note.targetUserId === record.targetUserId)?.notes,
+                }
+            }
+        });
 
     }
 

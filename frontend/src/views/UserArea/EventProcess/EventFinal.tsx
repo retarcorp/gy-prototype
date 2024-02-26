@@ -58,7 +58,7 @@ export default function EventFinal(props: EventFinalProps) {
                         <CardHeader
                             avatar={
                                 <Avatar sx={{ bgcolor: 'red[500]' }} aria-label="recipe">
-                                    {p.name.charAt(0)}
+                                    {/* {p.name.charAt(0)} */}
                                 </Avatar>
                             }
                             action={
@@ -75,12 +75,12 @@ export default function EventFinal(props: EventFinalProps) {
                                     </IconButton>
                                 </>
                             }
-                            title={p.name}
-                            subheader={p.nickname}
+                            // title={p.name}
+                            // subheader={p.nickname}
                         />
 
                         {expanded[i] && <CardContent>
-                            <Typography variant="caption" color={'gray'}>About {p.name}: </Typography>
+                            {/* <Typography variant="caption" color={'gray'}>About {p.name}: </Typography> */}
                             <Typography variant="body2" color="text.secondary" marginBottom={2}>{p.aboutMe}</Typography>
                             <TextField value={p.note} rows={4} fullWidth multiline label={'Notes for myself'} onChange={(e) => updateEntry(i, 'note', e.target.value)} />
                         </CardContent>}

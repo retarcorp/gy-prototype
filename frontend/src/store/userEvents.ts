@@ -66,19 +66,19 @@ const getEvents = (url: string, action: Function, d = (j: any) => j) => (dispatc
 }
 
 export const loadUserEvents = () => (dispatch: Function) => {
-    return getEvents('http://localhost:8000/events/available', userEventsSlice.actions.setAvailableEvents)(dispatch);
+    return getEvents(`${HOST}/events/available`, userEventsSlice.actions.setAvailableEvents)(dispatch);
 }
 
 export const loadUpcomingEvents = () => (dispatch: Function) => {
-    return getEvents('http://localhost:8000/events/registered', userEventsSlice.actions.setUpcomingEvents)(dispatch);
+    return getEvents(`${HOST}/events/registered`, userEventsSlice.actions.setUpcomingEvents)(dispatch);
 }
 
 export const loadRegistrations = () => (dispatch: Function) => {
-    return getEvents('http://localhost:8000/events/registered', userEventsSlice.actions.setRegistrations)(dispatch);
+    return getEvents(`${HOST}/events/registered`, userEventsSlice.actions.setRegistrations)(dispatch);
 }
 
 export const getParticipatedEvents = () => (dispatch: Function) => {
-    return getEvents('http://localhost:8000/events/participated', userEventsSlice.actions.setParticipatedEvents)(dispatch);
+    return getEvents(`${HOST}/events/participated`, userEventsSlice.actions.setParticipatedEvents)(dispatch);
 }
 
 export const loadAllEvents = () => (dispatch: Function) => {
@@ -86,7 +86,7 @@ export const loadAllEvents = () => (dispatch: Function) => {
 }
 
 export const registerOnEvent = (e: any) => (dispatch: Function) => {
-    return fetch(`http://localhost:8000/events/${e.id}/registration`, {
+    return fetch(`${HOST}/events/${e.id}/registration`, {
         method: 'POST',
         headers: {
             ...getAuthHeaders(),
@@ -107,7 +107,7 @@ export const registerOnEvent = (e: any) => (dispatch: Function) => {
 }
 
 export const unregisterFromEvent = (e: any) => (dispatch: Function) => {
-    return fetch(`http://localhost:8000/events/${e.id}/registration`, {
+    return fetch(`${HOST}/events/${e.id}/registration`, {
         method: 'DELETE',
         headers: {
             ...getAuthHeaders(),
@@ -247,10 +247,5 @@ export const fetchEventResults = (eventId: number) => (dispatch: Function) => {
             console.error(err);
         });
 }
-
-const { actions } = userEventsSlice;
-
-// export const { logIn } = userSlice.actions;
-export const { } = userEventsSlice.actions;
 
 export default userEventsSlice;

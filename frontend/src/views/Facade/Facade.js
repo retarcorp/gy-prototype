@@ -36,7 +36,7 @@ export default function Facade({ mode = 'loading' }) {
     }, [currentUser, isLoading, dispatch])
 
     return <>
-        {internalMode === 'loading' ? <AuthStub /> : null}
+        {internalMode === 'loading' ? null : null}
         {internalMode === 'auth' ? <AuthFacade /> : null}
         {internalMode === 'user' ? <UserArea /> : null}
         {internalMode === 'admin' ? <AdminPage /> : null}

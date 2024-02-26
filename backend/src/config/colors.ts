@@ -863,4 +863,16 @@ Yellow (Ryb)
 Zaffre
 Zinnwaldite Brown`.split('\n').sort(() => Math.random() - 0.5)
 
-export default colors;
+const shortlist = ["Jungle Jam",
+"Flamingo Fling",
+"Canopy Connections",
+"Amazon Aviaries",
+"Rainforest Rendezvous",
+"Peacock Parade",
+"Savannah Soirees",
+"Bumblebee Ball",
+"Galapagos Gathering",
+"Garden Get-togethers",
+]
+
+export default shortlist;

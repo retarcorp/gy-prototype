@@ -52,7 +52,7 @@ export default function EventParticipance(props: EventEnrollmentProps) {
                 <CardHeader
                     avatar={
                         <Avatar sx={{ bgcolor: 'red[500]' }} aria-label="recipe">
-                            {props.partner.name[0].toUpperCase()}
+                            {/* {props.partner.email[0].toUpperCase()} */}
                         </Avatar>
                     }
                     action={

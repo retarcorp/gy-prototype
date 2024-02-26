@@ -1,38 +1,20 @@
-import { Avatar, Box, Button, Card, CardContent, CardHeader, Checkbox, Divider, Grid, Tab, Tabs, Typography } from '@mui/material';
-import React, { useEffect } from 'react';
+import { Avatar, Box, Button, Card, CardContent, CardHeader, Divider, Grid, Tab, Tabs, Typography } from '@mui/material';
+import React from 'react';
 import EventCard from '../../../components/EventCard';
-import { testPastEvents } from '../../../testData/events';
-import participants from '../../../testData/participants.js'
 import { formatEvent } from '../../../hooks/useFetchAdminEvents';
 
 type EventResultsPageProps = {
-    event: any
+    event: any,
+    results: any[];
 }
-
-const getSelection = (N: number) => participants.sort(() => Math.random() - 0.5).slice(0, N).map((p: any) => {
-    return {
-        id: p.id,
-        name: p.name,
-        nickname: p.nickname,
-        isLiked: Math.random() > 0.5,
-        aboutMe: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec odio et massa finibus laoreet. Integer ut aliquam lacus, ',
-        note: 'dolor sit amet, consectetur adipiscing elit. Sed nec odio et massa finibus laoreet. Integer ut aliquam lacus, ',
-        contacts: 'Phone: +36'+Math.floor(Math.random()*1000000000) + ', email: '+p.nickname.toLowerCase().replace(' ', '.')+'@gmail.com'
-    }
-})
 
 export default function EventResultsPageView(props: EventResultsPageProps) {
 
     const currentEvent = formatEvent(props.event);
-    const [matches, setMatches] = React.useState<any[]>([]);
-    const [likes, setLikes] = React.useState<any[]>([]);
+    const matches = props.results.filter((r: any) => r.type === 'MATCH');
+    const likes = props.results.filter((r: any) => r.type === 'LIKEDBY');
+
     const [currentTab, setCurrentTab] = React.useState<number>(0);
-
-    useEffect(() => {
-        setMatches(getSelection(4));
-        setLikes(getSelection(12));
-    }, [currentTab]);
-
 
     return <Box>
         <Grid container direction={'column'} spacing={2} minHeight={'100vh'} >
@@ -48,14 +30,14 @@ export default function EventResultsPageView(props: EventResultsPageProps) {
 
             <Grid item>
                 <Tabs value={currentTab} onChange={(e, i) => setCurrentTab(i)}>
-                    <Tab label='Matches (4)' value={0}></Tab>
-                    <Tab label='Liked by others (+12)' value={1}></Tab>
+                    <Tab label={`Matches (${matches.length})` } value={0}></Tab>
+                    <Tab label={`Liked by others (+${likes.length})`} value={1}></Tab>
                 </Tabs>
             </Grid>
 
             <Grid item>
                 <Grid container direction={'column'} spacing={1}>
-                    {(currentTab === 0 ? matches : likes).map(p => <Grid item>
+                    {(currentTab === 0 ? matches : likes).map(({targetUser: p}) => <Grid item>
                         <Card sx={{ width: '100%', textAlign: 'start' }} elevation={1}>
                             <CardHeader
                                 avatar={
@@ -72,7 +54,7 @@ export default function EventResultsPageView(props: EventResultsPageProps) {
                                 <Typography variant="body2" color="text.secondary" >{p.aboutMe}</Typography>
                                 <Divider style={{margin: '10px 0'}}/>
                                 <Typography variant="caption" color={'gray'}>My notes about {p.name}: </Typography>
-                                <Typography variant="body2" color="text.secondary">{p.note}</Typography>
+                                <Typography variant="body2" color="text.secondary">{p.notes}</Typography>
                                 <Divider style={{margin: '10px 0'}}/>
                                 <Typography variant="caption" color={'gray'}>Contacts that {p.name} shared: </Typography>
                                 <Typography variant="body2" color="text.secondary">{p.contacts}</Typography>

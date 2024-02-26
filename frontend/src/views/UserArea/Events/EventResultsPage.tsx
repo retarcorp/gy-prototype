@@ -18,7 +18,7 @@ const EventResultsPage = () => {
     }, [])
     
 
-    return <> {results ? <EventResultsPageView event={results.event}/> : 'Loading results...' } </>
+    return <> {results ? <EventResultsPageView results={results.results} event={results.event}/> : 'Loading results...' } </>
 }
 
 export default withUserAuthWrapper(withUserWrapper(EventResultsPage));

@@ -89,10 +89,10 @@ export const GameComponent = (props: {
                                 <Typography variant="caption">Table {i + 1}: {t.table}</Typography>
                             </TableCell>
                             <TableCell>
-                                <Typography variant="caption">{t.player1.name} ({t.player1.nickname})</Typography>
+                                {/* <Typography variant="caption">{t.player1.email} ({t.player1.nickname})</Typography> */}
                             </TableCell>
                             <TableCell>
-                                <Typography variant="caption">{t.player2.name} ({t.player2.nickname})</Typography>
+                                {/* <Typography variant="caption">{t.player2.email} ({t.player2.nickname})</Typography> */}
                             </TableCell>
                         </TableRow>)}
                     </TableBody>

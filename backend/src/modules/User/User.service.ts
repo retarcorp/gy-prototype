@@ -51,12 +51,14 @@ export class UserService {
         }).then(user => this.getPublicProfile(user));
     }
 
-    getPublicProfile(user: UserModel): PublicProfile {
-        return {
+    getPublicProfile(user: UserModel, include: string[] = []): PublicProfile {
+        const res = {
             id: user.id,
             name: user.name,
             nickname: user.nickname,
             aboutMe: user.aboutMe,
         }
+        include.forEach(key => res[key] = user[key]);
+        return res;
     }
 }

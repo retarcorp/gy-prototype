@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { HOST } from '../services/api';
 
 const userSlice = createSlice({
     name: 'user',
@@ -46,7 +47,7 @@ const { actions } = userSlice;
 export const signUp = (email: string, password: string) => (dispatch: Function) => {
     dispatch(userSlice.actions.setIsLoading({ value: true }));
 
-    fetch('http://localhost:8000/users', {
+    fetch(`${HOST}/users`, {
         method: 'POST',
         body: new URLSearchParams({ email, password })
     })
@@ -70,7 +71,7 @@ export const signUp = (email: string, password: string) => (dispatch: Function) 
 export const signIn = (email: string, password: string) => (dispatch: Function) => {
     dispatch(userSlice.actions.setIsLoading({ value: true }));
 
-    fetch('http://localhost:8000/users/signin', {
+    fetch(`${HOST}/users/signin`, {
         method: 'POST',
         body: new URLSearchParams({ email, password })
     })
@@ -104,7 +105,7 @@ export const validateToken = () => (dispatch: Function) => {
         return;
     }
 
-    fetch('http://localhost:8000/users/validate', {
+    fetch(`${HOST}/users/validate`, {
         method: 'GET',
         headers: {
             'Authorization': 'Bearer ' + token,
@@ -134,7 +135,7 @@ export const submitOnboarding = (onboardingData: { [key: string]: string }) => (
     dispatch(actions.setIsLoading({ value: true }));
 
 
-    fetch(`http://localhost:8000/users/onboarding`, {
+    fetch(`${HOST}/users/onboarding`, {
         method: 'POST',
         headers: { ...getAuthHeaders() },
         body: new URLSearchParams(onboardingData)

@@ -31,7 +31,7 @@ describe('Test-purpose actions, with side effects!', () => {
     })
 
     const registerAndAddToEventNPeople = (eventId) => it('Can register, onboard and register N users for an event', async () => {
-        const N = 6;
+        const N = 15;
         const EVENT_ID = eventId;
 
         const testSuit = {
@@ -50,7 +50,9 @@ describe('Test-purpose actions, with side effects!', () => {
                 phone: '' + (10 ** 9 + Math.round(Math.random() * 10 ** 8)),
                 name: 'Test - ' + Math.round(Math.random() * 10 ** 5),
                 nickname: 'Test',
-                aboutMe: 'Test',
+                aboutMe: 'Test record which is same for every test user',
+                contactsForLikes: 'Contacts for guys whom I liked +36'+(10 ** 9 + Math.round(Math.random() * 10 ** 8)),
+                contactsForMatches: 'Contacts for guys who matched me +36'+(10 ** 9 + Math.round(Math.random() * 10 ** 8)),
             })
             return user;
         }
@@ -69,7 +71,7 @@ describe('Test-purpose actions, with side effects!', () => {
         const EVENT_ID = eventId;
         const event = await prismaClient.event.findFirst({ where: { id: EVENT_ID } });
         const registrations = await prismaClient.registration.findMany({ where: { eventId: EVENT_ID } });
-        
+
         const promises = registrations.map(async registration => {
             await eventService.enrollOnEvent(registration.id);
         })
@@ -79,6 +81,36 @@ describe('Test-purpose actions, with side effects!', () => {
     const startGame = (eventId) => it('Can start a game', async () => {
         const game = await gameService.startGame(eventId);
     })
+
+
+    const createLikes = (eventId) => it('Can create likes', async () => {
+        const game = await gameUtilsService.getGameByEventId(eventId);
+        const gameSetup: GameSetup = await gameService.getGameSetup(game.id);
+
+        const participants = gameSetup.participants;
+        const users = participants.map(p => p.user);
+        const pIdtoUid = (pId) => participants.find(p => p.id === pId)?.userId;
+
+        const promises = gameSetup.tableArrangements.map(async ta => {
+            const aUid = pIdtoUid(ta.participantAId)
+            const bUid = pIdtoUid(ta.participantBId)
+
+            if (aUid && bUid) {
+                if (Math.random() > 0.30) {
+                    await gameResultService.setLike(game.id, aUid, bUid, true);
+                }
+                if (Math.random() > 0.30) {
+                    await gameResultService.setLike(game.id, bUid, aUid, true);
+                }
+
+            }
+        })
+
+        await Promise.all(promises)
+        const likeCount = await prismaClient.gameLike.count({ where: { gameId: game.id } });
+        console.log('likeCount', likeCount);
+
+    });
 
     const moveToNextRound = (eventId) => it('Can move to next round', async () => {
         const game = await gameUtilsService.getGameByEventId(eventId);
@@ -95,15 +127,18 @@ describe('Test-purpose actions, with side effects!', () => {
 
     const closeGame = (eventId) => it('Can close game', async () => {
         const game = await gameUtilsService.getGameByEventId(eventId);
+        await prismaClient.game.update({ where: { id: game.id }, data: { status: GameStatus.FINAL } });
         await gameService.closeGame(game.id);
     })
 
-    const eventId = 163;
+    const eventId = 172;
     // registerAndAddToEventNPeople(eventId);
     // openEvent(eventId);
     // enrollAllToEvent(eventId);
     // startGame(eventId);
+    createLikes(eventId);
     // moveToNextRound(eventId);
+ 
     // setGameToTheBeginning(eventId);
     closeGame(eventId);
 
